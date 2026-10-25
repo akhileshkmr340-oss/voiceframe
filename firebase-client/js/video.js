@@ -2,10 +2,8 @@
 // moving clip made by an open video model (LTX-Video, with Wan 2.2 as backup) on
 // Hugging Face's free ZeroGPU Spaces, called through their public Gradio queue API.
 //
-// The free GPU allowance is per person and shared by every ZeroGPU Space: without
-// an account it covers about 2-3 clips, then refills over time. The Spaces say so
-// explicitly ("You have exceeded your ZeroGPU quota … Try again in H:MM:SS"); that
-// time is remembered so a later film doesn't waste minutes on refused requests.
+// ZeroGPU allowance is daily GPU processing time, shared across Spaces.
+// Cache only reset times explicitly returned by the provider; never invent one.
 import { Cancelled } from './ai.js?v=25';
 
 const SPACES = [
@@ -27,21 +25,26 @@ export const hfToken = () => localStorage.getItem('vf_hf_token') || '';
 class QuotaError extends Error {}
 export const isQuotaError = e => e instanceof QuotaError;
 
-// ---- free allowance bookkeeping (per browser) ----
-const QUOTA_KEY = 'vf_video_quota_until';
-const quotaUntil = () => +(localStorage.getItem(QUOTA_KEY) || 0);
+// Keep provider cooldowns per credential in this session. Legacy browser-wide
+// timestamps guessed a 30-minute wait and incorrectly blocked newly added tokens.
+// The provider remains authoritative after reloads and for unknown reset times.
+const quotaByCredential = new Map();
+const quotaState = () => quotaByCredential.get(hfToken());
+const quotaUntil = () => quotaState()?.until || 0;
 export const videoQuotaLeft = () => Date.now() >= quotaUntil();
 export const quotaRefillText = () => {
+  if (quotaState()?.unknown) return 'an unknown amount of time (Hugging Face did not supply a reset time)';
   const ms = quotaUntil() - Date.now();
   if (ms <= 0) return 'now';
-  const m = Math.ceil(ms / 60000);
-  return m >= 60 ? `about ${Math.round(m / 60)} h` : `about ${m} min`;
+  const minutes = Math.ceil(ms / 60000);
+  return minutes >= 60 ? `about ${Math.floor(minutes / 60)} h ${minutes % 60} min` : `about ${minutes} min`;
 };
 function noteQuota(message) {
-  // "Try again in 1:23:45"; a balance below zero says 0:00:00 but still needs time to refill
   const m = /Try again in (\d+):(\d+):(\d+)/i.exec(message || '');
   const wait = m ? ((+m[1] * 60 + +m[2]) * 60 + +m[3]) * 1000 : 0;
-  localStorage.setItem(QUOTA_KEY, String(Date.now() + Math.max(wait, 30 * 60000)));
+  quotaByCredential.set(hfToken(), wait > 0
+    ? { until: Date.now() + wait, unknown: false }
+    : { until: 0, unknown: true });
 }
 
 function auth() {
