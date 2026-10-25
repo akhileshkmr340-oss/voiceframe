@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {geminiStoryChat, usesGemini} from '../firebase-client/js/gemini-writer.js';
+const values=new Map();
+globalThis.localStorage={getItem:k=>values.get(k)||null};
+globalThis.sessionStorage={getItem:k=>values.get(k)||null};
+const messages=[{role:'system',content:'Write JSON.'},{role:'user',content:'An original village story.'}];
+test('unconfigured Gemini never sends a request',async()=>{values.clear();let calls=0;globalThis.fetch=async()=>{calls++};await assert.rejects(geminiStoryChat(messages),/Add your free-tier/);assert.equal(calls,0);assert.equal(usesGemini(),false)});
+test('Gemini uses explicit provider selection and a header key with bounded JSON output',async()=>{values.set('vf_gemini_key','test-only-key');values.set('vf_story_writer','gemini');let request;globalThis.fetch=async(url,options)=>{request={url,options};return {ok:true,status:200,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:'{"title":"Village"}'}]}}]})}};assert.equal(usesGemini(),true);assert.equal(await geminiStoryChat(messages),' {"title":"Village"}'.trim());assert.ok(!request.url.includes('test-only-key'));assert.equal(request.options.headers['x-goog-api-key'],'test-only-key');const body=JSON.parse(request.options.body);assert.equal(body.generationConfig.responseMimeType,'application/json');assert.equal(body.generationConfig.maxOutputTokens,8192);assert.equal(body.contents[0].role,'user')});
+test('quota rejection makes one request and no paid fallback',async()=>{let calls=0;globalThis.fetch=async()=>{calls++;return {status:429,ok:false}};await assert.rejects(geminiStoryChat(messages),/No automatic paid fallback/);assert.equal(calls,1)});
+test('invalid credentials produce an actionable error without echoing server content',async()=>{globalThis.fetch=async()=>({status:403,ok:false});await assert.rejects(geminiStoryChat(messages),/Check your API key/)});
+test('truncated story output is rejected',async()=>{globalThis.fetch=async()=>({status:200,ok:true,json:async()=>({candidates:[{finishReason:'MAX_TOKENS',content:{parts:[{text:'{"partial":'}]}}]})});await assert.rejects(geminiStoryChat(messages),/did not finish/)});
+test('already cancelled requests do not call the provider',async()=>{let calls=0;globalThis.fetch=async()=>{calls++};const c=new AbortController();c.abort();await assert.rejects(geminiStoryChat(messages,{signal:c.signal}),e=>e.name==='AbortError');assert.equal(calls,0)});

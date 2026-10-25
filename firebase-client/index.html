@@ -239,6 +239,7 @@
 
         <div class="actions">
           <button class="btn btn-primary btn-lg" id="btnAuto">🎬 Create full film automatically</button>
+          <button class="btn btn-ghost btn-lg" id="btnFlowPlan">↗ Prepare story for Flow</button>
           <button class="btn btn-ghost btn-lg" id="btnStoryOnly">Write the story first, then review each step</button>
           <button class="btn btn-ghost btn-lg" id="btnGptStory">🤖 Write with my ChatGPT</button>
         </div>
@@ -403,6 +404,10 @@
 <dialog id="settingsDialog" class="dialog">
   <form method="dialog">
     <h2>Settings</h2>
+    <label class="field"><span>Story writer</span><select id="setWriter"><option value="shared">Existing shared writer (service limits apply)</option><option value="gemini">Google Gemini 2.5 Flash-Lite (your API key)</option></select></label>
+    <label class="field"><span>Gemini API key (optional; this tab only)</span><input id="setGemini" type="password" autocomplete="off" placeholder="Your Gemini API key"></label>
+    <label class="check"><input id="setGeminiFree" type="checkbox"><span>I have checked that this key belongs to a free-tier API project with no paid billing enabled.</span></label>
+    <p class="tiny muted">Gemini writes stories, cast and scene prompts. Requests go directly to Google. Flow credits are not used. Quota errors stop instead of upgrading or switching to a paid model. The app cannot verify your API project's billing status; check it before adding a key. The key is cleared when this tab's session ends. Without a Gemini key, use the existing shared writer.</p>
     <label class="field"><span>Pollinations API key (optional)</span>
       <input id="setKey" type="password" placeholder="sk_…" autocomplete="off"></label>
     <p class="tiny muted">Without a key, the shared free services are subject to quotas, availability and failures. With your own key from <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">enter.pollinations.ai</a>, scenes paint in parallel, plus Hindi voices and premium narrators. The key stays in this browser only.</p>
@@ -461,6 +466,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="js/config.js?v=25"></script>
-<script type="module" src="js/app.js?v=27"></script>
+<script type="module" src="js/app.js?v=28"></script>
 </body>
 </html>

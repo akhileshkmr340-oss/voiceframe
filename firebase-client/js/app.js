@@ -2,7 +2,7 @@ import { requiresGeneratedVideo, missingVideoScenes, assertGeneratedVideo } from
 import * as Auth from './auth.js?v=25';
 import * as Store from './store.js?v=25';
 import { paintImage, stockImage, hasKey, getKey, relayStatus, relayHasKey, Cancelled } from './ai.js?v=25';
-import { writeStory, scenePrompt, portraitPrompt, rewriteScene, SCENE_COUNT, chatgptStoryPrompt, importStory, chatgptImagePrompts } from './story.js?v=25';
+import { writeStory, scenePrompt, portraitPrompt, rewriteScene, SCENE_COUNT, chatgptStoryPrompt, importStory, chatgptImagePrompts } from './story.js?v=28';
 import * as CR from './copyright.js?v=25';
 import { Dictation, KOKORO_NARRATORS, POLLI_NARRATORS, castVoices, castOptions, loadVoiceEngine, speak, playBuffer } from './voice.js?v=25';
 import { mixFilm, previewScore } from './music.js?v=25';
@@ -66,13 +66,14 @@ function download(blob, name) {
 
 // Hand off a storyboard locally to the separate Flow assembly workflow.
 // No credentials or media are sent to Google by this link.
-document.addEventListener('click', e => {
-  if (!e.target.closest('a[data-flow]') || !P?.scenes?.length) return;
+function transferFlowStoryboard() {
+  if (!P?.scenes?.length) return;
   const cast = P.characters.map(c => JSON.stringify(c)).join('\n');
   const prompts = P.scenes.map((sc, i) => `SCENE ${i + 1}: ${sc.title || ''}\n${motionPrompt(sc)}\nNarration context: ${sc.narration || ''}\nDialogue: ${(sc.dialogue || []).map(d => `${P.characters.find(c => c.id === d.character)?.name || d.character}: ${d.line}`).join(' / ')}\nReuse the same character reference in Flow. Generate one output and review credit cost first.`).join('\n\n');
   try { localStorage.setItem('vf_flow_storyboard', `CHARACTER REFERENCES\n${cast}\n\n${prompts}`); }
   catch { toast('Could not transfer the storyboard. Copy scene prompts manually in Flow assembly.', true); }
-});
+}
+document.addEventListener('click', e => { if (e.target.closest('a[data-flow]')) transferFlowStoryboard(); });
 
 // ============ status / jobs ============
 function setStatus(title, detail = '', progress = null) {
@@ -672,6 +673,12 @@ $('#btnAuto').onclick = () => (autoRender = true, runJob(async signal => {
   await doMix(signal);
   goStep('film');
 }).then(ok => { if (!ok) autoRender = false; }));
+$('#btnFlowPlan').onclick = () => runJob(async signal => {
+  await doStory(signal);
+  transferFlowStoryboard();
+  await save(true);
+  window.location.href = 'flow.html';
+});
 $('#btnStoryOnly').onclick = () => runJob(async signal => { await doStory(signal); goStep('story'); });
 $('#btnRewrite').onclick = () => {
   if (!confirm('Rewrite the whole story? Current scenes and images will be replaced.')) return;
@@ -1186,6 +1193,9 @@ loadBrand();
 
 // ============ settings ============
 $('#btnSettings').onclick = () => {
+  $('#setWriter').value = localStorage.getItem('vf_story_writer') || 'shared';
+  $('#setGemini').value = sessionStorage.getItem('vf_gemini_key') || '';
+  $('#setGeminiFree').checked = !!sessionStorage.getItem('vf_gemini_free');
   $('#setKey').value = localStorage.getItem('vf_pollen_key') || '';
   $('#setHf').value = localStorage.getItem('vf_hf_token') || '';
   $('#setEngine').value = localStorage.getItem('vf_voice_mode') || 'auto';
@@ -1194,6 +1204,14 @@ $('#btnSettings').onclick = () => {
 };
 $('#settingsDialog').addEventListener('close', () => {
   if ($('#settingsDialog').returnValue !== 'save') return;
+  if ($('#setWriter').value === 'gemini' && (!$('#setGemini').value.trim() || !$('#setGeminiFree').checked)) {
+    toast('Gemini needs an API key and confirmation that its project is on the free tier. Writer settings were not changed.', true, 10000);
+    return;
+  }
+  localStorage.setItem('vf_story_writer', $('#setWriter').value);
+  const geminiKey = $('#setGemini').value.trim();
+  if (geminiKey) sessionStorage.setItem('vf_gemini_key', geminiKey); else sessionStorage.removeItem('vf_gemini_key');
+  if ($('#setGeminiFree').checked) sessionStorage.setItem('vf_gemini_free', 'yes'); else sessionStorage.removeItem('vf_gemini_free');
   const k = $('#setKey').value.trim();
   if (k) localStorage.setItem('vf_pollen_key', k); else localStorage.removeItem('vf_pollen_key');
   localStorage.setItem('vf_voice_mode', $('#setEngine').value);

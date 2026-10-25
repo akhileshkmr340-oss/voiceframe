@@ -1,5 +1,8 @@
 // Story writer, character designer and prompt builder.
-import { chat, parseJSON, hasKey } from './ai.js?v=25';
+import { chat as sharedChat, parseJSON, hasKey } from './ai.js?v=25';
+import { usesGemini, geminiStoryChat } from './gemini-writer.js?v=28';
+const chat = (messages, options) => usesGemini() ? geminiStoryChat(messages, options) : sharedChat(messages, options);
+
 import { ORIGINAL_RULES } from './copyright.js?v=25';
 
 export const SCENE_COUNT = { shorts: 5, short: 6, medium: 10, long: 16, film5: 32, film10: 64 };
@@ -128,7 +131,7 @@ ${sceneJSON}` });
       done++;
     }
   };
-  await Promise.all(Array.from({ length: hasKey() ? 4 : 1 }, worker));
+  await Promise.all(Array.from({ length: hasKey() && !usesGemini() ? 4 : 1 }, worker));
   const scenes = parts.flat();
   const film = normalise({ ...outline, scenes }, n);
   // Shorts are carried by the characters' own lines; drop any narrator text the model added.
@@ -138,7 +141,7 @@ ${sceneJSON}` });
 
 async function askJSON(sys, user, { onStatus, signal, label }) {
   let lastErr;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < (usesGemini() ? 1 : 3); attempt++) {
     const reply = await chat([{ role: 'system', content: sys }, { role: 'user', content: user }], {
       signal, onWait: sec => onStatus?.(sec ? `${label} (free writer busy, starting in ${sec}s)` : label)
     });
@@ -250,6 +253,6 @@ export async function rewriteScene(p, i, { onWait, signal }) {
   const reply = await chat([
     { role: 'system', content: 'You are a film narrator-writer. Reply with ONLY the new narration text.\n' + ORIGINAL_RULES },
     { role: 'user', content: `Story: ${p.logline}\nPrevious scene: ${p.scenes[i - 1]?.narration || '(none)'}\nThis scene: ${sc.visual}\nNext scene: ${p.scenes[i + 1]?.narration || '(end)'}\nRewrite this scene's narration in ${p.language || 'English'}: 2-3 vivid sentences, 30-45 words, present tense, more cinematic than: "${sc.narration}"` }
-  ], { onWait, signal });
+  ], { onWait, signal, json: false });
   return reply.replace(/^["'\s]+|["'\s]+$/g, '');
 }
