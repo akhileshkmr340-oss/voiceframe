@@ -64,6 +64,16 @@ function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 }
 
+// Hand off a storyboard locally to the separate Flow assembly workflow.
+// No credentials or media are sent to Google by this link.
+document.addEventListener('click', e => {
+  if (!e.target.closest('a[data-flow]') || !P?.scenes?.length) return;
+  const cast = P.characters.map(c => JSON.stringify(c)).join('\n');
+  const prompts = P.scenes.map((sc, i) => `SCENE ${i + 1}: ${sc.title || ''}\n${motionPrompt(sc)}\nNarration context: ${sc.narration || ''}\nDialogue: ${(sc.dialogue || []).map(d => `${P.characters.find(c => c.id === d.character)?.name || d.character}: ${d.line}`).join(' / ')}\nReuse the same character reference in Flow. Generate one output and review credit cost first.`).join('\n\n');
+  try { localStorage.setItem('vf_flow_storyboard', `CHARACTER REFERENCES\n${cast}\n\n${prompts}`); }
+  catch { toast('Could not transfer the storyboard. Copy scene prompts manually in Flow assembly.', true); }
+});
+
 // ============ status / jobs ============
 function setStatus(title, detail = '', progress = null) {
   $('#statusbar').hidden = false;
