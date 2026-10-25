@@ -37,4 +37,8 @@ Tests use provider mocks and consume no generation credits. End-to-end AI genera
 
 ## Live provider smoke test — 25 October 2026
 
-A single anonymous LTX-Video request, using an original synthetic landscape test image and no paid key, completed successfully. `ffprobe` identified an H.264 file at 896×512, 30 fps, 1.9 seconds, 57 decoded frames; all 57 decoded frame hashes differed. This establishes that this provider call returned a genuine short video at test time. It does not verify dialogue lip-sync, character consistency, a 10-minute generation, or production-site deployment.
+A single anonymous LTX-Video request, using an original synthetic landscape test image and no paid key, completed successfully. `ffprobe` identified an H.264 file at 896×512, 30 fps, 1.9 seconds, 57 decoded frames; all 57 decoded frame hashes differed. This establishes that this provider call returned a genuine short video at test time. It does not verify dialogue lip-sync, character consistency, or a 10-minute generation.
+
+## Production deployment — 25 October 2026
+
+Deployed commit f2cab50cde483dcae7333ee6e90c20a9d46cfa4a to https://voiceframe-studio.web.app/ using the authenticated Firebase CLI. Hosting reported release complete. Live HTML, app.js and motion-policy.js match the tested local files; the browser shows the updated full-motion controls. Existing Permissions-Policy, Referrer-Policy and X-Content-Type-Options headers are present. The root URL retains Firebase's one-hour HTML cache; reopen with ?verify=motion25 to bypass an older cached entry. Full-film generation remains unverified.
