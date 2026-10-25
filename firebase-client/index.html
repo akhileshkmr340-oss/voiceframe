@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoiceFrame Studio — Speak a story, get a cinematic film</title>
+<meta name="description" content="Turn a spoken or written idea into a full story, original characters and a narrated cinematic video. Free, copyright-safe, ready for YouTube, Shorts and Reels.">
+<meta name="theme-color" content="#0b0a12">
+<meta property="og:title" content="VoiceFrame Studio">
+<meta property="og:description" content="Speak a story. Get a cinematic film — with voice, music and original characters.">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=23">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#" data-go="landing" aria-label="VoiceFrame home">
+    <img src="assets/icon.svg" alt="" width="30" height="30">
+    <span>Voice<b>Frame</b></span>
+  </a>
+  <nav class="topnav">
+    <a href="#how" data-go="landing" data-scroll="how">How it works</a>
+    <a href="#safe" data-go="landing" data-scroll="safe">Copyright-safe</a>
+    <a href="#" data-go="projects" class="auth-only">My films</a>
+    <a href="#" data-go="studio" class="auth-only">Studio</a>
+  </nav>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btnSettings" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" transform="translate(-1 0)"/></svg>
+    </button>
+    <button class="btn btn-ghost guest-only" data-go="auth">Sign in</button>
+    <button class="btn btn-primary guest-only" data-go="auth" data-mode="signup">Start free</button>
+    <div class="user-chip auth-only" id="userChip">
+      <span class="avatar" id="userAvatar">A</span>
+      <span class="user-name" id="userName"></span>
+      <button class="btn btn-ghost btn-sm" id="btnSignOut">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ LANDING ============ -->
+<section id="view-landing" class="view">
+  <div class="hero">
+    <canvas id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <p class="eyebrow">AI film studio · free · runs in your browser</p>
+      <h1>Speak a story.<br><span class="grad">Get a cinematic film.</span></h1>
+      <p class="lead">Say or type one line. VoiceFrame writes the full story, designs the characters, paints every scene, then narrates and scores it into a video you can download and post to YouTube, Shorts, Reels or WhatsApp.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary btn-lg" data-go="studio">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1A7 7 0 0 0 19 12h-2Z"/></svg>
+          Create my film
+        </button>
+        <a class="btn btn-ghost btn-lg" href="#how" data-scroll="how">See how it works</a>
+      </div>
+      <ul class="hero-badges">
+        <li>🎙️ Voice or text input</li><li>🎭 Original characters</li><li>🎬 1080p MP4</li><li>🛡️ Copyright-safe</li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="section" id="how">
+    <h2 class="section-title">From one sentence to a finished film</h2>
+    <div class="pipeline">
+      <article class="pipe-card"><span class="pipe-n">1</span><h3>Speak or write</h3><p>Dictate your idea in English or Hindi, or type it. Voice commands like <em>“create film”</em> work too.</p></article>
+      <article class="pipe-card"><span class="pipe-n">2</span><h3>Full story</h3><p>An AI writer expands it into a complete story with a beginning, a turn and an ending, split into cinematic scenes.</p></article>
+      <article class="pipe-card"><span class="pipe-n">3</span><h3>Character design</h3><p>Each character gets a look, a personality, a portrait and a voice, and stays consistent across scenes.</p></article>
+      <article class="pipe-card"><span class="pipe-n">4</span><h3>Scenes &amp; camera</h3><p>Every scene is painted and given a camera move: push-ins, pans, light, grain and colour grading.</p></article>
+      <article class="pipe-card"><span class="pipe-n">5</span><h3>Voice &amp; score</h3><p>A neural narrator voices the story. An original soundtrack is composed for your film alone.</p></article>
+      <article class="pipe-card"><span class="pipe-n">6</span><h3>Download &amp; post</h3><p>Export MP4 in 16:9, 9:16 or 1:1, then share to YouTube, Instagram, Facebook, X, LinkedIn or WhatsApp.</p></article>
+    </div>
+  </section>
+
+  <section class="section safe" id="safe">
+    <div class="safe-grid">
+      <div>
+        <h2 class="section-title left">Review rights before publishing</h2>
+        <p class="muted">Each video includes a source report. Generated content and source licences still need review; this app cannot guarantee copyright clearance.</p>
+        <ul class="checklist">
+          <li><b>Original story.</b> Prompts are screened for franchise characters, brands and song lyrics. Those get turned into original creations.</li>
+          <li><b>Generated visuals.</b> Scenes are AI-generated for your film, or public-domain (CC0/PDM) stock with full source records.</li>
+          <li><b>Unique music.</b> The soundtrack is synthesised note by note in your browser, so there's no third-party track to trigger Content ID.</li>
+          <li><b>Synthetic voice.</b> Narration comes from the open Kokoro-82M voice model (Apache-2.0). No real person's voice is cloned.</li>
+          <li><b>AI disclosure.</b> Your upload description includes the AI-content label YouTube and Meta ask for.</li>
+        </ul>
+      </div>
+      <div class="safe-card">
+        <div class="safe-shield">🛡️</div>
+        <h3>Licence report included</h3>
+        <p>Download <code>credits.txt</code> with every video: sources, licences, seeds and models. Keep it in case anyone ever asks.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-band">
+    <h2>Your next story is one sentence away.</h2>
+    <button class="btn btn-primary btn-lg" data-go="studio">Open the studio</button>
+  </section>
+  <footer class="footer">
+    <span>© <span id="year"></span> VoiceFrame Studio</span>
+    <span class="muted">Story &amp; images: Pollinations.ai · Voice: Kokoro-82M · Stock: Openverse (CC0/PDM)</span>
+  </footer>
+</section>
+
+<!-- ============ AUTH ============ -->
+<section id="view-auth" class="view" hidden>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <img src="assets/icon.svg" alt="" width="48" height="48">
+      <h2 id="authTitle">Welcome back</h2>
+      <p class="muted" id="authSub">Sign in to start creating films.</p>
+      <button class="btn btn-google" id="btnGoogle">
+        <svg viewBox="0 0 48 48" width="20" height="20"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36a12 12 0 1 1 7.9-21l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5Z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8A12 12 0 0 1 31.9 15l5.7-5.7A20 20 0 0 0 6.3 14.7Z"/><path fill="#4CAF50" d="M24 44a20 20 0 0 0 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28l-6.5 5A20 20 0 0 0 24 44Z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.2-.1-2.3-.4-3.5Z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider"><span>or</span></div>
+      <form id="authForm" autocomplete="on">
+        <label class="field signup-only" hidden><span>Your name</span><input name="name" type="text" autocomplete="name" maxlength="60"></label>
+        <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
+        <label class="field"><span>Password</span><input name="password" type="password" autocomplete="current-password" minlength="6" required></label>
+        <p class="form-error" id="authError" role="alert"></p>
+        <button class="btn btn-primary btn-block" type="submit" id="authSubmit">Sign in</button>
+      </form>
+      <p class="auth-switch"><span id="authSwitchText">New to VoiceFrame?</span> <a href="#" id="authSwitch">Create an account</a></p>
+      <p class="auth-switch signin-only"><a href="#" id="authReset">Forgot password?</a></p>
+      <p class="tiny muted" id="authModeNote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="view-projects" class="view" hidden>
+  <div class="page">
+    <div class="page-head">
+      <h2>My films</h2>
+      <button class="btn btn-primary" id="btnNewProject">+ New film</button>
+    </div>
+    <div class="projects-grid" id="projectsGrid"></div>
+    <p class="muted empty" id="projectsEmpty" hidden>No films yet. Your first one is a sentence away.</p>
+  </div>
+</section>
+
+<!-- ============ STUDIO ============ -->
+<section id="view-studio" class="view" hidden>
+  <div class="studio">
+    <aside class="stepper" id="stepper">
+      <button data-step="idea" class="active"><i>1</i><span>Idea</span></button>
+      <button data-step="story"><i>2</i><span>Story</span></button>
+      <button data-step="characters"><i>3</i><span>Characters</span></button>
+      <button data-step="scenes"><i>4</i><span>Scenes</span></button>
+      <button data-step="sound"><i>5</i><span>Voice &amp; music</span></button>
+      <button data-step="film"><i>6</i><span>Film &amp; share</span></button>
+    </aside>
+
+    <div class="studio-main">
+      <div class="statusbar" id="statusbar" hidden>
+        <div class="spinner"></div>
+        <div class="status-text"><b id="statusTitle">Working…</b><span id="statusDetail"></span></div>
+        <div class="status-progress"><div id="statusBar"></div></div>
+        <button class="btn btn-ghost btn-sm" id="btnCancel">Cancel</button>
+      </div>
+
+      <!-- STEP 1: IDEA -->
+      <div class="panel" data-panel="idea">
+        <h2>What's your story about?</h2>
+        <p class="muted">Speak or type a line or two. You can also paste a whole story you wrote.</p>
+        <div class="idea-box">
+          <textarea id="ideaInput" rows="5" maxlength="8000" placeholder="e.g. A lonely lighthouse keeper in Kerala finds a glowing fish that can grant one wish, but every wish costs a memory…"></textarea>
+          <div class="idea-tools">
+            <button class="mic-btn" id="btnMic" title="Speak your idea" aria-label="Speak your idea">
+              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1A7 7 0 0 0 19 12h-2Z"/></svg>
+              <span class="mic-ring"></span>
+            </button>
+            <div class="mic-info">
+              <b id="micState">Tap the mic and speak</b>
+              <span class="tiny muted">Voice commands: “create film”, “write story”, “clear”, “stop listening”</span>
+            </div>
+            <select id="micLang" title="Dictation language">
+              <option value="en-IN">English (India)</option>
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+              <option value="hi-IN">हिन्दी</option>
+            </select>
+          </div>
+          <div class="chips" id="ideaChips"></div>
+        </div>
+
+        <div class="options-grid">
+          <label class="field"><span>Genre</span>
+            <select id="optGenre">
+              <option value="auto">Auto (from idea)</option><option>Fantasy</option><option>Adventure</option><option>Drama</option><option>Mystery</option><option>Sci-fi</option><option>Horror</option><option>Romance</option><option>Comedy</option><option>Mythology</option><option>Kids / fable</option><option>Motivational</option><option>History</option>
+            </select></label>
+          <label class="field"><span>Length</span>
+            <select id="optLength">
+              <option value="shorts">YouTube Short · 15–20 s · 5 quick shots, 9:16</option>
+              <option value="short">Short · ~1 min · 6 scenes</option>
+              <option value="medium" selected>Medium · ~2–3 min · 10 scenes</option>
+              <option value="long">Long · ~4–5 min · 16 scenes</option>
+              <option value="film5">Full film · ~5–6 min · 32 scenes</option>
+              <option value="film10">Full film · ~10–11 min · 64 scenes</option>
+            </select></label>
+          <label class="field"><span>Visual style</span>
+            <select id="optStyle">
+              <option value="cinematic">Cinematic live-action</option>
+              <option value="pixar">3D animated film</option>
+              <option value="anime">Anime</option>
+              <option value="painterly">Painterly / concept art</option>
+              <option value="watercolor">Watercolour storybook</option>
+              <option value="noir">Film noir (B&amp;W)</option>
+              <option value="indian">Indian miniature art</option>
+            </select></label>
+          <label class="field"><span>Format</span>
+            <select id="optFormat">
+              <option value="16:9">16:9 · YouTube</option>
+              <option value="9:16">9:16 · Shorts / Reels / TikTok</option>
+              <option value="1:1">1:1 · Instagram feed</option>
+            </select></label>
+          <label class="field"><span>Story language</span>
+            <select id="optLang">
+              <option value="English">English</option>
+              <option value="Hindi">Hindi (needs Pollinations key for voice)</option>
+            </select></label>
+          <label class="field"><span>Scene motion</span>
+            <select id="optMotion">
+              <option value="ai">Full-motion AI clips (free quota; pauses if unavailable)</option>
+              <option value="3d">Photo animation only (not generated footage)</option>
+            </select></label>
+          <label class="field"><span>Scene visuals</span>
+            <select id="optVisuals">
+              <option value="ai">AI-generated images (service limits apply)</option>
+              <option value="stock">Public-domain photos (instant)</option>
+            </select></label>
+        </div>
+        <p class="tiny muted">Full-motion mode requires a generated video for every scene and pauses when the free service is unavailable. It uses LTX/Wan, not Google Flow. Dialogue lip-sync is not included. Photo animation is available only when you explicitly choose it.</p>
+        <label class="check"><input type="checkbox" id="optUseOwn"> <span>Use my text as the story (adapt it into scenes without rewriting the plot)</span></label>
+
+        <div class="actions">
+          <button class="btn btn-primary btn-lg" id="btnAuto">🎬 Create full film automatically</button>
+          <button class="btn btn-ghost btn-lg" id="btnStoryOnly">Write the story first, then review each step</button>
+          <button class="btn btn-ghost btn-lg" id="btnGptStory">🤖 Write with my ChatGPT</button>
+        </div>
+        <p class="tiny muted" id="speedNote"></p>
+      </div>
+
+      <!-- STEP 2: STORY -->
+      <div class="panel" data-panel="story" hidden>
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow" id="storyGenre"></p>
+            <h2 contenteditable="true" spellcheck="false" id="storyTitle" class="editable">Untitled</h2>
+            <p class="logline editable" contenteditable="true" id="storyLogline"></p>
+          </div>
+          <div class="head-actions">
+            <button class="btn btn-ghost" id="btnRewrite">↻ Rewrite</button>
+            <button class="btn btn-primary" data-next="characters">Characters →</button>
+          </div>
+        </div>
+        <div class="copyright-flag" id="storyFlag" hidden></div>
+        <label class="field"><span>Full story (editable)</span>
+          <textarea id="storyText" rows="16" class="story-text"></textarea></label>
+        <p class="tiny muted">Editing the full story doesn't change the scenes. Use “Rewrite” or edit scene narration in step 4.</p>
+      </div>
+
+      <!-- STEP 3: CHARACTERS -->
+      <div class="panel" data-panel="characters" hidden>
+        <div class="panel-head">
+          <div><h2>Cast &amp; character design</h2><p class="muted">Each look is reused in every scene so characters stay consistent.</p></div>
+          <div class="head-actions">
+            <button class="btn btn-ghost" id="btnPortraits">🎨 Design portraits</button>
+            <button class="btn btn-primary" data-next="scenes">Scenes →</button>
+          </div>
+        </div>
+        <div class="cast-grid" id="castGrid"></div>
+      </div>
+
+      <!-- STEP 4: SCENES -->
+      <div class="panel" data-panel="scenes" hidden>
+        <div class="panel-head">
+          <div><h2>Storyboard</h2><p class="muted" id="scenesSummary"></p></div>
+          <div class="head-actions">
+            <button class="btn btn-ghost" id="btnVisuals">🖼️ Paint all scenes</button>
+            <button class="btn btn-ghost" id="btnAnimate">🎬 Animate all scenes</button>
+            <button class="btn btn-ghost" id="btnGptFrames">🤖 Frames from my ChatGPT</button>
+            <button class="btn btn-primary" data-next="sound">Voice &amp; music →</button>
+          </div>
+        </div>
+        <p id="motionStatus" class="copyright-flag" role="status">Write a story before generating motion clips.</p>
+        <div class="scene-list" id="sceneList"></div>
+      </div>
+
+      <!-- STEP 5: SOUND -->
+      <div class="panel" data-panel="sound" hidden>
+        <div class="panel-head">
+          <div><h2>Voice, music &amp; look</h2><p class="muted">In fast mode the voice is recorded in the cloud in seconds. Otherwise it runs on your device (the first time it downloads about 90 MB, which is then cached).</p></div>
+          <div class="head-actions">
+            <button class="btn btn-primary" id="btnBuildSound">🎙️ Record voice &amp; score →</button>
+          </div>
+        </div>
+        <div class="options-grid">
+          <label class="field"><span>Narrator voice</span><select id="optNarrator"></select></label>
+          <label class="field"><span>Speaking speed</span>
+            <select id="optSpeed"><option value="0.9">Slow &amp; dramatic</option><option value="1" selected>Natural</option><option value="1.1">Brisk</option></select></label>
+          <label class="field"><span>Soundtrack mood</span>
+            <select id="optMood">
+              <option value="auto">Auto (from story)</option><option value="epic">Epic</option><option value="adventure">Adventure</option><option value="emotional">Emotional</option><option value="mysterious">Mysterious</option><option value="dark">Dark / suspense</option><option value="romantic">Romantic</option><option value="joyful">Joyful</option><option value="scifi">Sci-fi</option>
+            </select></label>
+          <label class="field"><span>Music volume</span><input type="range" id="optMusicVol" min="0" max="100" value="55"></label>
+          <label class="field"><span>Captions</span>
+            <select id="optCaptions"><option value="karaoke">Word-by-word highlight</option><option value="classic">Classic subtitles</option><option value="none">No captions</option></select></label>
+          <label class="field"><span>Character dialogue</span>
+            <select id="optDialogue"><option value="voiced">Voiced by each character</option><option value="narrator">Read by narrator</option><option value="off">Skip dialogue</option></select></label>
+        </div>
+        <div class="toggles">
+          <label class="check"><input type="checkbox" id="optDepth" checked> <span>3D camera motion (depth parallax)</span></label>
+          <label class="check"><input type="checkbox" id="optBars" checked> <span>Cinematic letterbox bars</span></label>
+          <label class="check"><input type="checkbox" id="optGrain" checked> <span>Film grain &amp; colour grade</span></label>
+          <label class="check"><input type="checkbox" id="optSfx" checked> <span>Ambient sound effects (rain, wind, ocean…)</span></label>
+          <label class="check"><input type="checkbox" id="optWatermark"> <span>Small “Made with VoiceFrame” tag</span></label>
+        </div>
+        <div class="brand-box">
+          <h3>Your channel branding</h3>
+          <p class="tiny muted">Shown on every film: your logo and channel name in the corner, plus a Subscribe pop-up. Saved for all your future films.</p>
+          <div class="brand-row">
+            <label class="brand-logo" title="Upload logo">
+              <img id="brandLogoImg" alt="" hidden>
+              <span id="brandLogoPh">+ Logo</span>
+              <input type="file" id="brandLogo" accept="image/*" hidden>
+            </label>
+            <div class="brand-fields">
+              <label class="field"><span>Channel name</span><input id="brandName" maxlength="40" placeholder="e.g. Akhilesh Stories"></label>
+              <div class="brand-actions">
+                <label class="btn btn-ghost btn-sm">⬆ Upload logo<input type="file" id="brandLogo2" accept="image/*" hidden></label>
+                <button class="btn btn-ghost btn-sm" id="brandRemove" type="button">Remove logo</button>
+                <label class="check"><input type="checkbox" id="brandSub" checked> <span>Subscribe pop-up</span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost" id="btnPreviewVoice">▶ Hear narrator</button>
+          <button class="btn btn-ghost" id="btnPreviewMusic">▶ Hear soundtrack (15 s)</button>
+        </div>
+      </div>
+
+      <!-- STEP 6: FILM -->
+      <div class="panel" data-panel="film" hidden>
+        <div class="panel-head">
+          <div><h2 id="filmTitle">Your film</h2><p class="muted" id="filmMeta"></p></div>
+          <div class="head-actions">
+            <button class="btn btn-primary" id="btnRender">⬇ Render MP4</button>
+          </div>
+        </div>
+        <div class="film-layout">
+          <div class="player">
+            <div class="player-stage" id="playerStage"><canvas id="playerCanvas"></canvas>
+              <button class="big-play" id="btnBigPlay" aria-label="Play">▶</button>
+            </div>
+            <div class="player-bar">
+              <button class="icon-btn" id="btnPlay" aria-label="Play">▶</button>
+              <input type="range" id="seek" min="0" max="1000" value="0">
+              <span class="tc" id="timecode">0:00 / 0:00</span>
+            </div>
+            <div class="render-box" id="renderBox" hidden>
+              <div class="render-progress"><div id="renderBar"></div></div>
+              <p class="tiny" id="renderText"></p>
+            </div>
+            <div class="download-box" id="downloadBox" hidden>
+              <a class="btn btn-primary" id="dlVideo" download>⬇ Download video</a>
+              <button class="btn btn-ghost" id="dlCredits">📄 Licence report</button>
+              <button class="btn btn-ghost" id="dlThumb">🖼️ Thumbnail</button>
+              <button class="btn btn-ghost" id="dlSrt">💬 Subtitles (.srt)</button>
+            </div>
+          </div>
+          <div class="film-side">
+            <div class="card">
+              <h3>Share &amp; upload</h3>
+              <p class="tiny muted">Each button downloads the video if needed, copies your title, description and hashtags, and opens that platform's upload page. Drop the file in and paste.</p>
+              <div class="share-grid" id="shareGrid"></div>
+              <button class="btn btn-ghost btn-block" id="btnNativeShare" hidden>📱 Share file to an app…</button>
+            </div>
+            <div class="card">
+              <h3>Copyright check</h3>
+              <ul class="cr-list" id="crList"></ul>
+            </div>
+            <div class="card">
+              <h3>Upload details</h3>
+              <label class="field"><span>Title</span><input id="metaTitle" maxlength="100"></label>
+              <label class="field"><span>Description</span><textarea id="metaDesc" rows="7"></textarea></label>
+              <label class="field"><span>Hashtags</span><input id="metaTags"></label>
+              <button class="btn btn-ghost btn-block" id="btnCopyMeta">Copy all</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<dialog id="settingsDialog" class="dialog">
+  <form method="dialog">
+    <h2>Settings</h2>
+    <label class="field"><span>Pollinations API key (optional)</span>
+      <input id="setKey" type="password" placeholder="sk_…" autocomplete="off"></label>
+    <p class="tiny muted">Without a key, the shared free services are subject to quotas, availability and failures. With your own key from <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">enter.pollinations.ai</a>, scenes paint in parallel, plus Hindi voices and premium narrators. The key stays in this browser only.</p>
+    <label class="field"><span>Hugging Face token (optional)</span>
+      <input id="setHf" type="password" placeholder="hf_…" autocomplete="off"></label>
+    <p class="tiny muted">AI video clips run free on Hugging Face's shared GPUs, which give each visitor a daily allowance. A free account token from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a> (type "Read") gives a larger allowance. It stays in this browser only.</p>
+    <label class="field"><span>Voice engine</span>
+      <select id="setEngine"><option value="auto">Cloud voice when available (fast)</option><option value="kokoro">On this device only (slower)</option></select></label>
+    <label class="field"><span>Export quality</span>
+      <select id="setQuality"><option value="1080">1080p (best)</option><option value="720">720p (faster)</option></select></label>
+    <div class="actions"><button class="btn btn-primary" value="save" id="btnSaveSettings">Save</button><button class="btn btn-ghost" value="cancel">Close</button></div>
+  </form>
+</dialog>
+
+<dialog id="gptStoryDialog" class="dialog gpt-dialog">
+  <h2>🤖 Write the story with your ChatGPT</h2>
+  <ol class="gpt-steps">
+    <li><b>Copy the prompt</b> (it includes your idea and settings) and open ChatGPT.
+      <div class="actions"><button class="btn btn-primary btn-sm" id="gptCopyStory" type="button">📋 Copy prompt</button>
+      <a class="btn btn-ghost btn-sm" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT ↗</a></div></li>
+    <li><b>Paste it into ChatGPT</b> and send. ChatGPT replies with the story as code (JSON).</li>
+    <li><b>Copy ChatGPT's whole reply</b> (use its copy button) and paste it here:
+      <textarea id="gptStoryPaste" rows="7" placeholder='{"title": "…", "characters": […], "scenes": […]}'></textarea></li>
+  </ol>
+  <p class="form-error" id="gptStoryError"></p>
+  <div class="actions"><button class="btn btn-primary" id="gptLoadStory" type="button">Load story</button>
+    <button class="btn btn-ghost" type="button" onclick="this.closest('dialog').close()">Close</button></div>
+</dialog>
+
+<dialog id="gptFramesDialog" class="dialog gpt-dialog">
+  <h2>🤖 Scene frames from your ChatGPT</h2>
+  <p class="muted tiny">ChatGPT keeps the characters looking the same across a conversation, so every frame matches.</p>
+  <ol class="gpt-steps">
+    <li><b>Copy the image instructions</b> and open ChatGPT (a new chat).
+      <div class="actions"><button class="btn btn-primary btn-sm" id="gptCopyFrames" type="button">📋 Copy image instructions</button>
+      <a class="btn btn-ghost btn-sm" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT ↗</a></div></li>
+    <li><b>Paste and send.</b> ChatGPT draws image 1; type <b>next</b> for each following image. Download each image (in order).</li>
+    <li><b>Upload all the images</b> at once. They go into scenes 1, 2, 3… in the order you downloaded them.
+      <div class="actions"><label class="btn btn-primary btn-sm">⬆ Upload ChatGPT frames<input type="file" id="gptFramesFile" accept="image/*" multiple hidden></label></div></li>
+  </ol>
+  <p class="tiny muted" id="gptFramesNote"></p>
+  <div class="actions"><button class="btn btn-ghost" type="button" onclick="this.closest('dialog').close()">Close</button></div>
+</dialog>
+
+<dialog id="crDialog" class="dialog">
+  <form method="dialog">
+    <h2>⚠️ Copyright check</h2>
+    <p id="crDialogText"></p>
+    <div class="actions">
+      <button class="btn btn-primary" value="original">Make it original (recommended)</button>
+      <button class="btn btn-ghost" value="edit">Let me edit</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/config.js?v=25"></script>
+<script type="module" src="js/app.js?v=25"></script>
+</body>
+</html>
