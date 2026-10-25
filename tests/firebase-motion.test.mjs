@@ -39,37 +39,20 @@ test('long scenes advance clip time monotonically without reversed gestures',()=
 
 const source=fs.readFileSync(new URL('../firebase-client/js/app.js',import.meta.url),'utf8');
 function functionSource(name){const start=source.indexOf('async function '+name+'(');if(start<0)throw Error(name);const end=source.indexOf('\n}',start)+2;return source.slice(start,end);}
-function appContext(p,quota=true,provider=async()=>({blob:clip(),model:'LTX-Video'})){
- const calls=[];
- const context={P:p,Blob,Error,Cancelled:class Cancelled extends Error{},requiresGeneratedVideo,missingVideoScenes,assertGeneratedVideo,
-  markLoading(){},renderSceneImage(){},save(){},setStatus(){},toast(){throw Error('Unexpected fallback toast');},
-  videoQuotaLeft:()=>quota,quotaRefillText:()=> 'about 30 min',isQuotaError:e=>!!e.quota,motionPrompt:()=> 'test prompt',
-  animateScene:async(...args)=>{calls.push(args);return provider(...args);}};
- vm.createContext(context);vm.runInContext(functionSource('animateOne')+'\n'+functionSource('doAnimate'),context);
- return {context,calls};
+function appContext(p){
+ const context={P:p,assertGeneratedVideo};
+ vm.createContext(context);vm.runInContext(functionSource('doAnimate'),context);
+ return context;
 }
-test('provider errors reject rather than pretending a scene animated',async()=>{
- const p=project(1);const {context}=appContext(p,true,async()=>{throw Error('Provider offline');});
- await assert.rejects(context.animateOne(0),/Scene 1 video generation failed/);
- assert.deepEqual(missingVideoScenes(p),[0]);
-});
-test('quota stops the pipeline and retains completed clips',async()=>{
- const p=project(2),completed=clip();p.images['scene-1']=clip();p.videos['scene-0']=completed;
- const {context}=appContext(p,true,async()=>{const e=Error('quota');e.quota=true;throw e;});
- await assert.rejects(context.doAnimate(),/quota exhausted/);
+test('render preparation never calls a remote generator and requires actual clips',async()=>{
+ const p=project(2),completed=clip();p.videos['scene-0']=completed;
+ const context=appContext(p);
+ await assert.rejects(context.doAnimate(),/AI video is incomplete/);
  assert.equal(p.videos['scene-0'],completed);
- assert.deepEqual(missingVideoScenes(p),[1]);
+ p.videos['scene-1']=clip();await context.doAnimate();await context.doAnimate();
 });
-test('retry generates only missing clips and can run again after a previous failure',async()=>{
- const p=project(2),completed=clip();p.images['scene-1']=clip();p.videos['scene-0']=completed;
- const {context,calls}=appContext(p);
- await context.doAnimate();await context.doAnimate();
- assert.equal(calls.length,1);assert.equal(p.videos['scene-0'],completed);assert.deepEqual(missingVideoScenes(p),[]);
-});
-test('already completed films do not require remaining generation quota',async()=>{
- const p=project(1);p.videos['scene-0']=clip();const {context,calls}=appContext(p,false);
- await context.doAnimate();assert.equal(calls.length,0);
-});
-test('missing scene images cannot lead to successful AI completion',async()=>{
- const {context}=appContext(project(2));await assert.rejects(context.doAnimate(),/AI video is incomplete/);
+test('active client has no Hugging Face generation dependency',()=>{
+ assert.ok(!source.includes("from './video.js"));
+ assert.ok(!source.includes('animateScene('));
+ assert.ok(!source.includes('quotaRefillText'));
 });

@@ -15,7 +15,7 @@ export function assertGeneratedVideo(project) {
   const missing = missingVideoScenes(project);
   if (missing.length) {
     const numbers = missing.map(i => i + 1).join(', ');
-    throw new Error(`AI video is incomplete: scene ${numbers} still needs a generated clip. Completed clips are saved. Retry Animate all scenes when the service is available. No photo-animation substitute was exported.`);
+    throw new Error(`AI video is incomplete: scene ${numbers} still needs a generated clip. Completed clips are saved. Import videos in Scenes or use Flow assembly. Rendering uses your browser without generation credits. No photo-animation substitute was exported.`);
   }
 }
 

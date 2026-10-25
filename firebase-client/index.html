@@ -225,8 +225,8 @@
             </select></label>
           <label class="field"><span>Scene motion</span>
             <select id="optMotion">
-              <option value="ai">Full-motion AI clips (free quota; pauses if unavailable)</option>
-              <option value="3d">Photo animation only (not generated footage)</option>
+              <option value="ai">Imported motion clips · free local rendering</option>
+              <option value="3d">Photo animation · free local rendering (not generated footage)</option>
             </select></label>
           <label class="field"><span>Scene visuals</span>
             <select id="optVisuals">
@@ -234,7 +234,7 @@
               <option value="stock">Public-domain photos (instant)</option>
             </select></label>
         </div>
-        <p class="tiny muted">Full-motion mode requires a generated video for every scene and pauses when the free service is unavailable. It uses LTX/Wan, not Google Flow. Dialogue lip-sync is not included. Photo animation is available only when you explicitly choose it.</p>
+        <p class="tiny muted">Rendering runs on your device and has no video-service quota. Full-motion mode requires imported videos for all scenes. Use Flow assembly to preserve original clip audio and timing. Photo animation is available only when you explicitly select it.</p>
         <label class="check"><input type="checkbox" id="optUseOwn"> <span>Use my text as the story (adapt it into scenes without rewriting the plot)</span></label>
 
         <div class="actions">
@@ -283,7 +283,7 @@
           <div><h2>Storyboard</h2><p class="muted" id="scenesSummary"></p></div>
           <div class="head-actions">
             <button class="btn btn-ghost" id="btnVisuals">🖼️ Paint all scenes</button>
-            <button class="btn btn-ghost" id="btnAnimate">🎬 Animate all scenes</button>
+            <a class="btn btn-ghost" href="flow.html" data-flow target="_blank" rel="noopener">↗ Flow clips &amp; free assembly</a>
             <button class="btn btn-ghost" id="btnGptFrames">🤖 Frames from my ChatGPT</button>
             <button class="btn btn-primary" data-next="sound">Voice &amp; music →</button>
           </div>
@@ -415,9 +415,6 @@
     <label class="field"><span>Pollinations API key (optional)</span>
       <input id="setKey" type="password" placeholder="sk_…" autocomplete="off"></label>
     <p class="tiny muted">Without a key, the shared free services are subject to quotas, availability and failures. With your own key from <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">enter.pollinations.ai</a>, scenes paint in parallel, plus Hindi voices and premium narrators. The key stays in this browser only.</p>
-    <label class="field"><span>Hugging Face token (optional)</span>
-      <input id="setHf" type="password" placeholder="hf_…" autocomplete="off"></label>
-    <p class="tiny muted">AI video clips run free on Hugging Face's shared GPUs, which give each visitor a daily allowance. A free account token from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a> (type "Read") gives a larger allowance. It stays in this browser only.</p>
     <label class="field"><span>Voice engine</span>
       <select id="setEngine"><option value="auto">Cloud voice when available (fast)</option><option value="kokoro">On this device only (slower)</option></select></label>
     <label class="field"><span>Export quality</span>
@@ -470,6 +467,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="js/config.js?v=25"></script>
-<script type="module" src="js/app.js?v=29"></script>
+<script type="module" src="js/app.js?v=30"></script>
 </body>
 </html>

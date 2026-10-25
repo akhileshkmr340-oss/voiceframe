@@ -1,15 +1,14 @@
-import { requiresGeneratedVideo, missingVideoScenes, assertGeneratedVideo } from './motion-policy.js?v=25';
+import { requiresGeneratedVideo, missingVideoScenes, assertGeneratedVideo } from './motion-policy.js?v=30';
 import * as Auth from './auth.js?v=25';
 import * as Store from './store.js?v=25';
 import { paintImage, stockImage, hasKey, getKey, relayStatus, relayHasKey, Cancelled } from './ai.js?v=25';
 import { writeStory, scenePrompt, portraitPrompt, rewriteScene, SCENE_COUNT, chatgptStoryPrompt, importStory, chatgptImagePrompts } from './story.js?v=28';
-import * as CR from './copyright.js?v=25';
+import * as CR from './copyright.js?v=30';
 import { Dictation, KOKORO_NARRATORS, POLLI_NARRATORS, castVoices, castOptions, loadVoiceEngine, speak, playBuffer } from './voice.js?v=25';
 import { mixFilm, previewScore } from './music.js?v=25';
 import { Renderer, buildTimeline, sizeFor, srt, INTRO } from './renderer.js?v=25';
 import { exportFilm } from './exporter.js?v=25';
 import { depthFor } from './depth.js?v=25';
-import { animateScene, isQuotaError, videoQuotaLeft, quotaRefillText } from './video.js?v=25';
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -499,51 +498,10 @@ const CAMERA_WORDS = {
 function motionPrompt(sc) {
   return `${sc.visual} Natural, lifelike motion: characters move and breathe naturally, hair and clothes move in the air, the environment is alive. ${CAMERA_WORDS[sc.camera] || 'smooth camera motion'}. Cinematic, film look, consistent faces.`;
 }
-// Animate scene i. Fail rather than substituting a moving still image.
-async function animateOne(i, signal, loud = false) {
-  const key = 'scene-' + i;
-  markLoading(key, true);
-  try {
-    const r = await animateScene(P.images[key], motionPrompt(P.scenes[i]), {
-      format: P.options.format, seconds: 5, signal,
-      onStatus: msg => setStatus('Turning scenes into video…', `Scene ${i + 1}: ${msg}`)
-    });
-    (P.videos ||= {})[key] = r.blob;
-    P.credits['video-' + i] = { kind: 'video', model: r.model };
-    return true;
-  } catch (e) {
-    if (e instanceof Cancelled) throw e;
-    if (isQuotaError(e)) {
-      throw new Error(`Free AI video quota exhausted. Retry in ${quotaRefillText()}. Completed clips are saved; no still-image substitute will be exported.`);
-    }
-    throw new Error(`Scene ${i + 1} video generation failed: ${e.message}. Completed clips are saved. Retry this scene or Animate all scenes.`);
-  } finally { markLoading(key, false); renderSceneImage(i); save(); }
-}
-async function doAnimate(signal) {
-  if (!videoQuotaLeft()) {
-    if (missingVideoScenes(P).length) {
-      throw new Error(`Free AI video quota exhausted. Retry in ${quotaRefillText()}. Completed clips are saved; no photo-animation substitute was exported.`);
-    }
-    return;
-  }
-  // The free allowance covers only a few clips, so the scenes that matter most go
-  // first: the opening hook, the ending, the climax, then the rest spread out.
-  const n = P.scenes.length, key = [0, n - 1, Math.round((n - 1) * 0.7), Math.round((n - 1) * 0.35), Math.round((n - 1) * 0.85), Math.round((n - 1) * 0.5)];
-  const order = [...new Set([...key, ...P.scenes.map((_, i) => i)])].filter(i => i >= 0 && i < n);
-  const todo = order.filter(i => P.images['scene-' + i] && !P.videos?.['scene-' + i]);
-  let done = 0;
-  const q = [...todo];
-  setStatus('Turning scenes into video…', `0 of ${todo.length} clips · free AI video (LTX-Video)`, 0);
-  // one at a time: the free GPU serves one clip per visitor at once
-  while (q.length) {
-    const i = q.shift();
-    await animateOne(i, signal);
-    done++;
-    setStatus('Turning scenes into video…', `${done} of ${todo.length} clips`, done / todo.length);
-  }
+// Rendering only uses existing footage. It never calls a video generation service.
+async function doAnimate() {
   assertGeneratedVideo(P);
 }
-$('#btnAnimate').onclick = () => runJob(async signal => { if (!allPainted()) await doVisuals(signal); await doAnimate(signal); renderChecklist(); });
 
 // <video> elements for the renderer, one per animated scene (cached per clip).
 const videoEls = new WeakMap();
@@ -781,7 +739,6 @@ function renderScenes() {
           <select class="s-cam" title="Camera move">${cams.map(c => `<option ${c === s.camera ? 'selected' : ''}>${c}</option>`).join('')}</select>
           <select class="s-amb" title="Ambient sound">${amb.map(c => `<option ${c === s.ambience ? 'selected' : ''}>${c}</option>`).join('')}</select>
           <label class="btn btn-primary btn-sm">＋ Import video<input type="file" accept="video/*,.mp4,.webm,.mov" class="s-upload-video" aria-label="Import video for scene ${i + 1}" hidden></label>
-          <button class="btn btn-ghost btn-sm s-animate">🎬 Animate</button>
           <button class="btn btn-ghost btn-sm s-play">▶ Play clip</button>
           <button class="btn btn-ghost btn-sm s-clip">⬇ Clip MP4</button>
           <button class="btn btn-ghost btn-sm s-repaint">🎨 AI paint</button>
@@ -877,12 +834,6 @@ $('#sceneList').addEventListener('click', e => {
   const card = e.target.closest('[data-scene]'); if (!card) return;
   const i = +card.dataset.scene;
   if (e.target.closest('.s-play')) playSceneClip(i, card).catch(error => toast(error.message, true, 10000));
-  if (e.target.closest('.s-animate')) runJob(async signal => {
-    if (!P.images['scene-' + i]) await paintScene(i, signal);
-    delete P.videos?.['scene-' + i];
-    await animateOne(i, signal, true);
-    renderChecklist();
-  });
   if (e.target.closest('.s-clip')) exportSceneClip(i);
   if (e.target.closest('.s-repaint')) runJob(async signal => { setStatus('Painting scene ' + (i + 1) + '…'); await paintScene(i, signal, true, 'ai'); refreshPreview(); });
   if (e.target.closest('.s-photo')) runJob(async signal => { setStatus('Finding another public-domain photo…'); await paintScene(i, signal, true, 'stock'); refreshPreview(); });
@@ -1247,7 +1198,6 @@ $('#btnSettings').onclick = () => {
   $('#setGemini').value = sessionStorage.getItem('vf_gemini_key') || '';
   $('#setGeminiFree').checked = !!sessionStorage.getItem('vf_gemini_free');
   $('#setKey').value = localStorage.getItem('vf_pollen_key') || '';
-  $('#setHf').value = localStorage.getItem('vf_hf_token') || '';
   $('#setEngine').value = localStorage.getItem('vf_voice_mode') || 'auto';
   $('#setQuality').value = localStorage.getItem('vf_quality') || '1080';
   $('#settingsDialog').showModal();
@@ -1266,8 +1216,6 @@ $('#settingsDialog').addEventListener('close', () => {
   if (k) localStorage.setItem('vf_pollen_key', k); else localStorage.removeItem('vf_pollen_key');
   localStorage.setItem('vf_voice_mode', $('#setEngine').value);
   localStorage.setItem('vf_quality', $('#setQuality').value);
-  const hf = $('#setHf').value.trim();
-  if (hf) localStorage.setItem('vf_hf_token', hf); else localStorage.removeItem('vf_hf_token');
   sceneAudio = null; mixBuf = null;
   speedNote();
   toast('Settings saved.');
@@ -1319,7 +1267,7 @@ function updateRenderAvailability() {
   $('#btnRender').disabled = blocked;
   $('#renderBlocked').hidden = !blocked;
   if (blocked) {
-    const text = `${P.scenes.length - missing.length} / ${P.scenes.length} scene videos ready. ${missing.length} video clips are missing; still images cannot render as full-motion footage. Import downloaded Flow videos in Scenes, or generate the missing clips explicitly. Render does not spend generation credits.`;
+    const text = `${P.scenes.length - missing.length} / ${P.scenes.length} scene videos ready. ${missing.length} video clips are missing; still images cannot render as full-motion footage. Import downloaded video clips in Scenes. Rendering runs on this device with no video-service quota.`;
     $('#renderBlockedText').textContent = text;
     $('#filmMeta').textContent = 'Waiting for scene video clips. Rendering has not started.';
   }
@@ -1335,5 +1283,5 @@ function updateMotionStatus() {
     return;
   }
   const missing = missingVideoScenes(P).length;
-  target.textContent = `${count - missing} / ${count} genuine AI video clips ready. ${missing ? 'Generation must finish for every scene before export. Completed clips are kept for retry.' : 'All scenes have generated clips.'} Providers: LTX-Video / Wan 2.2. Google Flow and dialogue lip-sync are not connected.`;
+  target.textContent = `${count - missing} / ${count} genuine AI video clips ready. ${missing ? 'Import a video for every missing scene before export. Existing clips are kept.' : 'All scenes have generated clips.'} Local browser rendering uses no generation credits. Import footage from Flow or another source; automatic Flow generation is not connected.`;
 }

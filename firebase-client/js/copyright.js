@@ -58,7 +58,7 @@ export function checklist(project) {
       ? { s: 'bad', t: `${missing} scene(s) have no image yet.` }
       : { s: 'ok', t: `Visuals: ${ai.length} AI-generated image(s)${stock.length ? `, ${stock.length} CC0 / public-domain photo(s)` : ''}. No attribution needed.` },
     ...(Object.keys(project.credits || {}).some(k => k.startsWith('video-'))
-      ? [{ s: 'ok', t: 'Motion: scene clips were generated from your own scene pictures by open video models (LTX-Video / Wan). No third-party footage was used.' }] : []),
+      ? [{ s: 'warn', t: 'Motion: imported or previously saved video clips. Check source licenses, likeness permissions and any required attribution before publishing.' }] : []),
     { s: 'ok', t: 'Music: an original score composed in your browser for this film. There is no third-party recording for Content ID to match.' },
     { s: 'ok', t: `Voice: ${voice}. No real person's voice is cloned.` },
     { s: 'warn', t: 'When uploading, tick “Altered or synthetic content” on YouTube (and “AI info” on Instagram/Facebook) if the film looks realistic. The disclosure text is already in your description.' }
@@ -89,7 +89,7 @@ export function credits(project) {
   });
   (project.scenes || []).forEach((s, i) => {
     const v = project.credits?.['video-' + i];
-    if (v) lines.push(`  Scene ${i + 1} motion: AI video generated from the scene picture with the open ${v.model} model (Hugging Face Space, free GPU).`);
+    if (v) lines.push(`  Scene ${i + 1} motion: saved video clip; source recorded as ${v.model || 'creator supplied'}. Verify source rights before publishing.`);
   });
   (project.characters || []).forEach(ch => {
     const c = project.credits?.['char-' + ch.id];
