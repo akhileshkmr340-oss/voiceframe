@@ -780,6 +780,7 @@ function renderScenes() {
         <div class="scene-meta">
           <select class="s-cam" title="Camera move">${cams.map(c => `<option ${c === s.camera ? 'selected' : ''}>${c}</option>`).join('')}</select>
           <select class="s-amb" title="Ambient sound">${amb.map(c => `<option ${c === s.ambience ? 'selected' : ''}>${c}</option>`).join('')}</select>
+          <label class="btn btn-primary btn-sm">＋ Import video<input type="file" accept="video/*,.mp4,.webm,.mov" class="s-upload-video" aria-label="Import video for scene ${i + 1}" hidden></label>
           <button class="btn btn-ghost btn-sm s-animate">🎬 Animate</button>
           <button class="btn btn-ghost btn-sm s-play">▶ Play clip</button>
           <button class="btn btn-ghost btn-sm s-clip">⬇ Clip MP4</button>
@@ -788,6 +789,7 @@ function renderScenes() {
           <button class="btn btn-ghost btn-sm s-rewrite">✍️ Rewrite</button>
           <label class="btn btn-ghost btn-sm">⬆ My image<input type="file" accept="image/*" class="s-upload" hidden></label>
         </div>
+        <p class="tiny muted">Import a downloaded Flow clip to use it here. This studio exports with Voice &amp; music narration; use Flow assembly to preserve a clip's original dialogue and timing.</p>
         <p class="credit-line" data-credit="${i}"></p>
       </div>
     </article>`).join('');
@@ -813,9 +815,54 @@ $('#sceneList').addEventListener('input', e => {
   P.scenes[+card.dataset.scene].narration = e.target.value;
   sceneAudio = null; mixBuf = null; save();
 });
+// Decode before replacing a scene, so an invalid upload cannot destroy its media.
+async function readImportedClip(file, signal) {
+  if (!file?.size || file.size > 250 * 1024 * 1024) throw new Error('Choose a non-empty video under 250 MB.');
+  const el = document.createElement('video'), url = URL.createObjectURL(file);
+  el.muted = true; el.playsInline = true; el.preload = 'auto';
+  try {
+    await new Promise((resolve, reject) => {
+      let timer;
+      const cleanup = () => { clearTimeout(timer); el.onloadeddata = null; el.onerror = null; signal?.removeEventListener('abort', cancel); };
+      const fail = error => { cleanup(); reject(error); };
+      const cancel = () => fail(new Cancelled());
+      if (signal?.aborted) return cancel();
+      signal?.addEventListener('abort', cancel, { once: true });
+      timer = setTimeout(() => fail(new Error('Video loading timed out. Try an MP4 downloaded from Flow.')), 20000);
+      el.onerror = () => fail(new Error('This browser cannot read that video. Try an MP4 downloaded from Flow.'));
+      el.onloadeddata = () => { cleanup(); resolve(); };
+      el.src = url; el.load();
+    });
+    if (signal?.aborted) throw new Cancelled();
+    if (!(el.duration > 0) || !Number.isFinite(el.duration) || !el.videoWidth || !el.videoHeight) throw new Error('The selected file has no readable video frames.');
+    const canvas = document.createElement('canvas'), scale = Math.min(1, 1280 / Math.max(el.videoWidth, el.videoHeight));
+    canvas.width = Math.max(1, Math.round(el.videoWidth * scale)); canvas.height = Math.max(1, Math.round(el.videoHeight * scale));
+    canvas.getContext('2d').drawImage(el, 0, 0, canvas.width, canvas.height);
+    const poster = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+    if (!poster) throw new Error('Could not extract a preview frame from this video.');
+    return { poster, duration: el.duration };
+  } finally { el.removeAttribute('src'); el.load(); URL.revokeObjectURL(url); }
+}
 $('#sceneList').addEventListener('change', e => {
   const card = e.target.closest('[data-scene]'); if (!card) return;
   const i = +card.dataset.scene, sc = P.scenes[i];
+  if (e.target.classList.contains('s-upload-video') && e.target.files[0]) {
+    const file = e.target.files[0]; e.target.value = '';
+    runJob(async signal => {
+      setStatus('Importing video…', `Scene ${i + 1}`);
+      const { poster, duration } = await readImportedClip(file, signal);
+      if (signal.aborted) throw new Cancelled();
+      (P.videos ||= {})['scene-' + i] = file;
+      P.images['scene-' + i] = poster;
+      P.credits['scene-' + i] = { kind: 'user' };
+      P.credits['video-' + i] = { kind: 'video', model: 'Imported video', duration };
+      P.options.motion = 'ai'; $('#optMotion').value = 'ai';
+      video = null; $('#downloadBox').hidden = true;
+      renderSceneImage(i); await save(true); updateStepper();
+      toast(`Scene ${i + 1} video imported. No generation credits used.`);
+    });
+    return;
+  }
   if (e.target.classList.contains('s-cam')) { sc.camera = e.target.value; refreshPreview(); }
   if (e.target.classList.contains('s-amb')) { sc.ambience = e.target.value; mixBuf = null; }
   if (e.target.classList.contains('s-upload') && e.target.files[0]) {
@@ -947,6 +994,8 @@ async function enterFilm() {
   await document.fonts.load('700 40px Cinzel'); await document.fonts.load('800 40px Inter');
   renderMeta(); renderChecklist(); renderShare();
   $('#filmTitle').textContent = P.title;
+  updateRenderAvailability();
+  if (missingVideoScenes(P).length) return;
   // Arriving here with missing portraits, scenes or sound (e.g. after "write the
   // story first"): make them now instead of rendering placeholders.
   const noPortrait = () => P.characters.some(c => !P.images['char-' + c.id] && !triedPortraits.has(c.id));
@@ -1071,6 +1120,7 @@ $('#btnRender').onclick = () => renderFull();
 const renderFull = () => runJob(async signal => {
   player.pause();
   clipStop?.();
+  if (missingVideoScenes(P).length) { updateRenderAvailability(); throw new Error('Import or generate the missing scene videos first. Rendering has not started and no generation credits were used.'); }
   if (!mixBuf || !allPainted() || missingVideoScenes(P).length) await ensureFilmParts(signal);
   assertGeneratedVideo(P);
   const q = +(localStorage.getItem('vf_quality') || 1080);
@@ -1263,7 +1313,19 @@ $('#authModeNote').textContent = mode === 'local' ? 'Accounts are saved on this 
 if (mode === 'local') $('#btnGoogle').hidden = true, $('.divider').hidden = true;
 show('landing');
 
+function updateRenderAvailability() {
+  if (!P) return;
+  const missing = missingVideoScenes(P), blocked = missing.length > 0;
+  $('#btnRender').disabled = blocked;
+  $('#renderBlocked').hidden = !blocked;
+  if (blocked) {
+    const text = `${P.scenes.length - missing.length} / ${P.scenes.length} scene videos ready. ${missing.length} video clips are missing; still images cannot render as full-motion footage. Import downloaded Flow videos in Scenes, or generate the missing clips explicitly. Render does not spend generation credits.`;
+    $('#renderBlockedText').textContent = text;
+    $('#filmMeta').textContent = 'Waiting for scene video clips. Rendering has not started.';
+  }
+}
 function updateMotionStatus() {
+  updateRenderAvailability();
   const target = $('#motionStatus');
   if (!target || !P) return;
   const count = P.scenes?.length || 0;

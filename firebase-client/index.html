@@ -355,6 +355,10 @@
             <button class="btn btn-primary" id="btnRender">⬇ Render MP4</button>
           </div>
         </div>
+        <div id="renderBlocked" class="copyright-flag" role="status" hidden>
+          <p id="renderBlockedText"></p>
+          <div class="actions"><button class="btn btn-primary" data-next="scenes">＋ Import clips in Scenes</button><a href="flow.html" data-flow class="btn btn-ghost" target="_blank" rel="noopener">↗ Assemble Flow clips with original audio</a></div>
+        </div>
         <div class="film-layout">
           <div class="player">
             <div class="player-stage" id="playerStage"><canvas id="playerCanvas"></canvas>
@@ -466,6 +470,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="js/config.js?v=25"></script>
-<script type="module" src="js/app.js?v=28"></script>
+<script type="module" src="js/app.js?v=29"></script>
 </body>
 </html>
