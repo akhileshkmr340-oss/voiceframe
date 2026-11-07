@@ -1,3 +1,4 @@
+import { compactPrompt } from './character-prompt.js?v=59';
 // Characters: the voice picker ("Select a voice"), the character editor (one full-screen page
 // for a film's character or a directory character), the character directory (the person's
 // saved characters, on this device) and uploads of their own character pictures.
@@ -250,7 +251,7 @@ function wirePicker() {
 // { src: 'film'|'dir', cid, lid, name, gender, age, role, era, setting, language, appearance,
 //   personality, info, voice, studioVoice, useMine, perf, realPhoto, consent, portrait,
 //   sheet, history: [{ id, blob, view: 'portrait'|'sheet', kind, fav, at, note }] }
-const FIELDS = ['name', 'gender', 'age', 'ageYears', 'outfit', 'wardrobe', 'role', 'era', 'setting', 'language', 'appearance', 'personality', 'info', 'voice', 'studioVoice', 'useMine', 'perf', 'realPhoto', 'consent'];
+const FIELDS = ['designPrompt', 'lastChange', 'name', 'gender', 'age', 'ageYears', 'outfit', 'wardrobe', 'role', 'era', 'setting', 'language', 'appearance', 'personality', 'info', 'voice', 'studioVoice', 'useMine', 'perf', 'realPhoto', 'consent'];
 const clone = o => (o == null ? o : structuredClone(o));
 const pickFields = o => Object.fromEntries(FIELDS.filter(k => o[k] !== undefined).map(k => [k, clone(o[k])]));
 export function draftFromFilm(P, c) {
@@ -332,7 +333,9 @@ const ed = { d: null, view: 'portrait', shownId: null, mode: 'film', onDone: nul
 export function openEditor(draft, { onDone, back = 'studio' } = {}) {
   ed.d = draft; ed.mode = draft.src; ed.onDone = onDone; ed.back = back;
   ed.view = draft.portrait || !draft.sheet ? 'portrait' : 'sheet';
-  ed.shownId = null;
+  ed.shownId = null; ed.busy = false;
+  $('#ceDescribe').value = draft.designPrompt || '';
+  $('#ceAsk').value = '';
   ed.sig = sigOf(draft);
   ctx.show('chared');
   setStartTab('words');
@@ -354,6 +357,9 @@ function renderEditor() {
   $('#ceTitle').textContent = d.name || 'Untitled character';
   if (document.activeElement !== $('#ceName')) $('#ceName').value = d.name || '';
   if (document.activeElement !== $('#ceInfo')) $('#ceInfo').value = d.info || '';
+  for (const id of ['#ceDesign','#ceDone','#ceBack','#ceSaveDir']) $(id).disabled = !!ed.busy;
+  $('#ceDesign').textContent = ed.busy ? 'Creating character…' : 'Design this character';
+  $('#ceChange .ce-go').disabled = !!ed.busy;
   $('#ceWhere').textContent = ed.mode === 'film' ? `In “${ctx.P()?.title || 'this film'}”${d.lid ? ' · linked to your directory' : ''}` : d.lid ? 'In your character directory' : 'New character · not saved yet';
   $('#ceVoiceName').textContent = voiceName(d.language || 'English', d);
   $('#cePull').hidden = !(ed.mode === 'film' && d.lid);
@@ -418,8 +424,9 @@ async function paint(view, change, { painter = '', format = '' } = {}, signal) {
   const refs = ref ? [await refJpeg(ref)] : undefined;
   const issue = outfitIssue(change, d);
   if (issue) throw new Error(issue);
-  const prompt = view === 'sheet' ? sheetPrompt(d, change) : portraitText(d, change);
-  console.info(`[character ${view} prompt]`, prompt);
+  const rawPrompt = view === 'sheet' ? sheetPrompt(d, change) : portraitText(d, change);
+  const prompt = await preparePrompt(rawPrompt, signal, 1600);
+  // The full private character prompt is not written to the console.
   lastPrompt = prompt;
   const seed = Math.floor(Math.random() * 1e6);
   const useRefs = refs && (!painter || painter === 'cloudflare-refs');
@@ -431,11 +438,22 @@ async function paint(view, change, { painter = '', format = '' } = {}, signal) {
     throw e;
   }
 }
+async function preparePrompt(text, signal, maxChars = 6000) {
+  return compactPrompt(text, { maxChars, signal,
+    onProgress: (part, total) => ctx.setStatus('Reading your full prompt…', `Preparing section ${part} of ${total}. Your original text is kept.`),
+    summarize: (part, limit) => chat([
+      { role:'system', content:`Create a concise factual visual brief under ${limit} characters. Preserve character identity, age, face, clothing, colours, setting, requested changes and negative constraints. Preserve the most recent explicit correction if details conflict. Do not add people or invent traits. Keep family-friendly constraints. Return only the brief.` },
+      { role:'user', content:part }
+    ], {signal, temperature:.2, maxTokens:500})
+  });
+}
 async function designFromWords(text, signal) {
+  ed.d.designPrompt = text;
+  const brief = await preparePrompt(text, signal);
   ctx.setStatus('Writing the casting brief…', 'The AI casting director reads your description');
   const reply = await chat([
     { role: 'system', content: 'You are the casting director of a family-friendly live-action film. Reply with ONLY valid JSON.' },
-    { role: 'user', content: `Description from the film-maker: "${String(text).slice(0, 800)}"
+    { role: 'user', content: `Description from the film-maker: "${brief}"
 Write a casting brief for ONE fictional person who does not exist. Never a real, famous or historical person's likeness: if the description asks for one, reply {"refused":"one short sentence"}. Keep children and teenagers in safe, ordinary, fully clothed situations.
 JSON: {"name":"","gender":"female|male|other","ageYears":30,"outfit":"their main outfit in a few English words (ordinary and fully clothed for anyone under 18)","role":"protagonist|ally|antagonist|mentor|other","appearance":"25-40 words in English starting with nationality or ethnicity: age, face, hair, skin tone, build, outfit with colours, one distinctive feature","personality":"under 12 words","info":"1-2 sentences: how they look and act","era":"e.g. modern, 1950s, medieval","setting":"e.g. a Kerala fishing village"}` }
   ], { signal, temperature: 0.6 });
@@ -458,7 +476,7 @@ JSON: {"name":"","gender":"female|male|other","ageYears":30,"outfit":"their main
 }
 function wireEditor() {
   $('#ceName').addEventListener('input', e => { ed.d.name = e.target.value.slice(0, 40); $('#ceTitle').textContent = ed.d.name || 'Untitled character'; });
-  $('#ceInfo').addEventListener('input', e => { ed.d.info = e.target.value.slice(0, 1200); });
+  $('#ceInfo').addEventListener('input', e => { ed.d.info = e.target.value; });
   for (const [id, k] of [['#ceGender', 'gender'], ['#ceRole', 'role'], ['#ceEra', 'era'], ['#ceSetting', 'setting'], ['#ceLook', 'appearance'], ['#ceLang', 'language']]) $(id).addEventListener('input', e => { ed.d[k] = e.target.value; if (k === 'language' || k === 'gender') renderEditor(); });
   const setAge = y => {
     const n = Math.max(0, Math.min(100, Math.round(+y) || 0));
@@ -510,10 +528,11 @@ function wireEditor() {
   };
   $('#ceStage').addEventListener('click', e => { if (e.target.closest('#ceMakeSheet')) runPaint('sheet', ''); });
   $('#ceDesign').onclick = () => {
+    if (ed.busy) return;
     const text = $('#ceDescribe').value.trim();
     if (text.length < 8) { ctx.toast('Describe the person in a sentence or two first.', true); $('#ceDescribe').focus(); return; }
-    ed.busy = true;
-    ctx.runJob(signal => designFromWords(text, signal)).then(() => { ed.busy = false; renderEditor(); });
+    ed.busy = true; renderEditor();
+    ctx.runJob(signal => designFromWords(text, signal)).finally(() => { ed.busy = false; if (ed.d) renderEditor(); });
   };
   const upload = async e => {
     const f = e.target.files[0]; e.target.value = '';
@@ -557,14 +576,14 @@ function wireEditor() {
 function runPaint(view, change) {
   if (ed.busy) return;
   const painter = $('#cePainter').value, format = $('#ceFormat').value;
-  ed.busy = true;
+  ed.busy = true; ed.d.lastChange = change; renderEditor();
   ctx.runJob(async signal => {
     ctx.setStatus(view === 'sheet' ? 'Painting the reference sheet…' : 'Painting the portrait…', change ? `Change: ${change.slice(0, 60)}` : 'One picture, from the portrait');
     const img = await paint(view, change, { painter, format }, signal);
     addVersion(img, view, change ? 'edit' : 'painted', change || (view === 'sheet' ? 'reference sheet' : 'portrait'));
     if (view === 'portrait') ed.d.realPhoto = false;
     $('#ceAsk').value = '';
-  }).then(() => { ed.busy = false; renderEditor(); });
+  }).finally(() => { ed.busy = false; if (ed.d) renderEditor(); });
 }
 function leave() { const back = ed.back; ed.d = null; ctx.show(back); }
 
@@ -699,7 +718,7 @@ function dzStart(choice) {
   if (!gender) { ctx.toast('Choose the gender.', true); $('#dzGender').focus(); return; }
   if (!(years >= 1 && years <= 100)) { ctx.toast('Set the age (1-100).', true); $('#dzAge').focus(); return; }
   const d = blankDraft();
-  Object.assign(d, { name: $('#dzName').value.trim().slice(0, 40) || 'New character', gender, ageYears: years, age: ageClass(years), appearance: text.slice(0, 400) });
+  Object.assign(d, { name: $('#dzName').value.trim().slice(0, 40) || 'New character', gender, ageYears: years, age: ageClass(years), appearance: text.slice(0, 400), designPrompt: text });
   // family-safe before any prompt is written for VoiceFrame or another site (adult-only
   // clothes never for under-18s)
   const issue = outfitIssue(text, d);
@@ -771,7 +790,7 @@ async function gptResult(file) {
   }
   // a style reference: a NEW person is painted by the free FLUX painter (it sees the upload)
   $('#gptDlg').close();
-  ed.busy = true;
+  ed.busy = true; ed.d.lastChange = change; renderEditor();
   ctx.runJob(async signal => {
     ctx.setStatus('Painting a new person from your style reference…', 'Free FLUX painter: same outfit, age and look, a face that does not exist');
     const prompt = sheetPrompt(d, '').replace(/^Character reference sheet for a live-action film, one photo-real person who does not exist \(image 0 is this person: keep the exact face, hair, skin tone and clothes\)/,
@@ -786,7 +805,7 @@ async function gptResult(file) {
     addVersion(img, 'sheet', 'style-ref', 'new person from your ' + tool.name + ' style reference');
     if (!d.portrait) d.portrait = img;
     d.realPhoto = false; delete d.consent;
-  }).then(() => { ed.busy = false; renderEditor(); });
+  }).finally(() => { ed.busy = false; if (ed.d) renderEditor(); });
 }
 function wireGpt() {
   $('#gptCopy').onclick = async () => {

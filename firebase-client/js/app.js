@@ -15,7 +15,7 @@ import { facesFor } from './faces.js?v=52';
 import { bodiesFor, motionFromVideo, clipMotionIssue } from './body.js?v=54';
 import { askDirector, CAMS, AMBS, LONG, QUICK, NO_CHANGE, HANDOFF, toolOf, handoffPrompt } from './director.js?v=57';
 import { runStudioVoices, studioEngine, filmLines, prepareVoiceSample, recorder, saveMyVoice, loadMyVoice, forgetMyVoice } from './studio.js?v=57';
-import { initCharacters, openVoicePicker, openEditor, openDesigner, openDesignPopup, draftFromFilm, draftFromEntry, applyDraftToFilm, saveDraftToDirectory, renderDirectory, loadDirectory, directory, migrateOldLibrary, castCheck, alwaysAsk, checkedUpload } from './characters.js?v=57';
+import { initCharacters, openVoicePicker, openEditor, openDesigner, openDesignPopup, draftFromFilm, draftFromEntry, applyDraftToFilm, saveDraftToDirectory, renderDirectory, loadDirectory, directory, migrateOldLibrary, castCheck, alwaysAsk, checkedUpload } from './characters.js?v=59';
 import { initDialogue, openDialogue } from './dialogue.js?v=57';
 import { initOutfitPicker, openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=57';
 import { voiceName, matchVoice, lineStyle, findVoice } from './voicebook.js?v=57';
@@ -156,11 +156,12 @@ function download(blob, name) {
 // ============ status / jobs ============
 function setStatus(title, detail = '', progress = null) {
   $('#statusbar').hidden = false;
+  if (!$('#view-chared').hidden) { $('#ceJobState').hidden = false; $('#ceJobTitle').textContent = title; $('#ceJobDetail').textContent = detail; }
   $('#statusTitle').textContent = title;
   $('#statusDetail').textContent = detail;
   if (progress != null) $('#statusBar').style.width = Math.round(progress * 100) + '%';
 }
-function clearStatus() { $('#statusbar').hidden = true; $('#statusBar').style.width = '0'; }
+function clearStatus() { $('#ceJobState').hidden = true; $('#statusbar').hidden = true; $('#statusBar').style.width = '0'; }
 // ---- safety: pictures and clips the checker blocked or could not check (safety.js) ----
 // P.blocked[key] = 'unsafe' | 'down' (key: scene-<i> or char-<id>): the card says so, and
 // nothing unchecked is used in its place.
@@ -176,6 +177,7 @@ const realFace = i =>['user', 'stock'].includes(P.credits['scene-' + i]?.kind) |
   || (P.scenes[i]?.characters || []).some(realPhoto);
 async function runJob(fn) {
   if (job) { toast('Still working on the last step. Cancel it first.'); return false; }
+  $('#ceJobResult').textContent = '';
   job = new AbortController();
   const controller = job;
   // the picture checker loads while the job starts (the first visit downloads ~88 MB)
@@ -184,7 +186,7 @@ async function runJob(fn) {
   catch (e) {
     controller.abort();
     if (e instanceof Cancelled || e.name === 'AbortError') toast('Cancelled.');
-    else { console.error(e); toast(e.message || 'Something went wrong.', true, e.unsafe ? 12000 : 6000); }
+    else { if (!$('#view-chared').hidden) $('#ceJobResult').textContent = e.message || 'Character generation failed. Your prompt is still here; try again.'; console.error(e); toast(e.message || 'Something went wrong.', true, e.unsafe ? 12000 : 6000); }
     return false;
   } finally { job = null; renderJob = false; clearStatus(); updateStepper(); setTimeout(afterJob); }
 }
@@ -192,6 +194,7 @@ $('#btnCancel').onclick = () => job?.abort();
 
 // ============ views ============
 function show(view) {
+  if (view === 'home') view = user ? 'projects' : 'landing';
   // the Character Designer: the character editor on a new character, no film needed
   if (view === 'designer' || view === 'aitools') { if (!user) { afterAuth = 'chars'; view = 'auth'; } else { openDesigner(view === 'aitools' ? 'tools' : 'words'); return; } }
   // "🎨 Character design" in the top bar: the design popup over the page that is open ("Done"
@@ -277,13 +280,19 @@ Auth.onUser(u => {
     $('#userName').textContent = u.name;
     $('#userAvatar').innerHTML = u.photo ? `<img src="${esc(u.photo)}" alt="" referrerpolicy="no-referrer">` : esc(u.name[0]?.toUpperCase() || 'U');
     if (!$('#view-auth').hidden) show(afterAuth);
+    else if (!$('#view-landing').hidden) show('projects');
     if (pendingTemplate && !$('#view-studio').hidden) { applyTemplate(pendingTemplate); pendingTemplate = null; }
   } else if (was) show('landing');
 });
 
 // ============ projects ============
 async function renderProjects() {
-  const list = await Store.listProjects(user.uid);
+  const all = await Store.listProjects(user.uid);
+  const query = ($('#projectSearch').value || '').trim().toLowerCase();
+  const list = all.filter(p => !query || (p.title || 'Untitled idea').toLowerCase().includes(query));
+  $('#dashboardProjectCount').textContent = all.length;
+  $('#projectsEmptyTitle').textContent = query ? 'No matching projects' : 'Your first film starts here';
+  $('#projectsEmptyText').textContent = query ? 'Try another project name.' : 'Create a video and it will appear in this workspace.';
   const grid = $('#projectsGrid');
   $('#projectsEmpty').hidden = list.length > 0;
   grid.innerHTML = list.map(p => {
@@ -305,6 +314,7 @@ $('#projectsGrid').onclick = async e => {
   const card = e.target.closest('.proj-card');
   if (card) openProject(await Store.getProject(card.dataset.id));
 };
+$('#projectSearch').addEventListener('input', () => { clearTimeout(renderProjects.searchTimer); renderProjects.searchTimer = setTimeout(renderProjects, 160); });
 $('#btnNewProject').onclick = () => { newProject(); show('studio'); };
 
 function newProject() {
@@ -479,9 +489,8 @@ $('#btnMic').onclick = () => {
 function speedNote() {
   const n = SCENE_COUNT[$('#optLength').value] || 10, shots = $('#optLength').value === 'shorts' ? n : Math.round(n * 2.4);
   const mode = motionMode(), gpuShots = mode === 'hero' ? Math.min(12, shots) : shots;
-  $('#speedNote').textContent = `About ${shots} shots. Story, pictures and voices: ${Math.max(3, Math.round(shots / 10) + 3)} minutes.`
-    + (mode === 'live' ? ' Characters move on your device: no GPU time used. Cost: ₹0.'
-      : ` AI motion for ${gpuShots} shots adds about ${Math.round(gpuShots / 1.5 + 12 + gpuShots * 0.2)} minutes on the free GPU, using about ${((gpuShots / 1.5 + 12 + gpuShots * 0.2) * 2 / 60).toFixed(1)} of the 30 free Kaggle GPU hours a week. Cost: ₹0 (no paid service is ever used). Keep this tab open; Finish now skips the wait.`);
+  $('#speedNote').textContent = `About ${shots} shots · story, pictures and voices are prepared first. `
+    + (mode === 'live' ? 'Basic mode animates still pictures on your device.' : 'Real footage is generated on a shared GPU. Availability and completion time vary; full-motion export waits for finished clips.');
 }
 // live: no GPU; hero: the speaking shots that matter most; full: every shot
 const motionMode = () => $('#optMotion')?.value || 'full';
@@ -1475,7 +1484,7 @@ async function autoFilm() {
   goStep('film');
   } finally {
     // stopped or failed before the pictures went up: free the waiting GPUs
-    if (motionJob) relay('cancel', { job: motionJob }).catch(() => {});
+    if (motionJob && P.gpuRun?.job !== motionJob) relay('cancel', { job: motionJob }).catch(() => {});
   }
   }).then(ok => { if (!ok) autoRender = false; });
 }
@@ -2116,7 +2125,7 @@ function shotStatus(i) {
   if (!P.images['scene-' + i] && blockedText('scene-' + i)) return `<span class="st warn blocked">⛔ ${esc(blockedText('scene-' + i))}</span>`;
   return (P.videos?.['scene-' + i] ? '<span class="st ok" title="' + esc(motionKind(i)) + '">🎬 AI video</span>' : P.images['scene-' + i] ? '<span class="st" title="' + esc(motionKind(i)) + '">🖼️ picture + live characters</span>' : '<span class="st warn">no picture</span>')
     + (s.lipStale ? ' <span class="st warn">👄 line changed: re-sync lips</span>' : '')
-    + (missed ? ` <span class="st warn" title="${esc(P.credits['want-' + i].error ? 'GPU error: ' + P.credits['want-' + i].error : 'It was sent to the free GPU but no clip came back.')} Tick it and press 🎬 Re-animate.">⚠ AI video not made: showing basic motion${P.credits['want-' + i].error ? ' (' + esc(P.credits['want-' + i].error.slice(0, 50)) + ')' : ''}</span>` : '')
+    + (missed ? ` <span class="st warn" title="${esc(P.credits['want-' + i].error ? 'GPU error: ' + P.credits['want-' + i].error : 'It was sent to the free GPU but no clip came back.')} Tick it and press 🎬 Re-animate.">⚠ ${requiresFullFootage(P) ? 'AI video missing: full-motion export is blocked' : 'AI video not made: showing basic animation'}${P.credits['want-' + i].error ? ' (' + esc(P.credits['want-' + i].error.slice(0, 50)) + ')' : ''}</span>` : '')
     + (P.credits['review-' + i] && P.videos?.['scene-' + i] ? ' <span class="st warn review">👀 New AI clip (hover to preview): <button class="btn btn-ghost btn-sm s-keep">✓ Keep</button><button class="btn btn-ghost btn-sm s-reject">✕ Reject</button></span>' : '')
     + (walks && !missed ? ' <span class="st" title="Walking, running and dancing need real AI video: tick it and press 🎬 Re-animate (free GPU)">🚶 needs AI video for real walking</span>' : '')
     + (P.clipIssues?.['scene-' + i] ? ` <span class="st warn" title="Tick it and press 🎬 Re-animate to make a new clip">⚠ ${esc(P.clipIssues['scene-' + i])}</span>` : '')
@@ -2494,7 +2503,7 @@ function fixShots(kind) {
       if (!sceneAudio) await doVoices(signal);
       await waitMotion(sendToGpu(signal, job, shots, { lipOnly: kind === 'lip', fresh: kind !== 'lip' }));
       ok = true;
-    } finally { if (!ok) relay('cancel', { job }).catch(() => {}); }
+    } finally { if (!ok && P.gpuRun?.job !== job) relay('cancel', { job }).catch(() => {}); }
     picked.clear(); timeline = null; mixBuf = null; video = null;
     renderScenes(); save();
     toast(`✅ ${shots.length} shot${shots.length > 1 ? 's' : ''} fixed. Open Film & tools to render the new version.`, false, 8000);
@@ -2609,7 +2618,7 @@ $('#btnTranslate').onclick = () => runJob(async signal => {
   }
   let ok = false;
   try { await waitMotion(sendToGpu(signal, job, speaking, { lipOnly: true })); ok = true; }
-  finally { if (!ok) relay('cancel', { job }).catch(() => {}); }
+  finally { if (!ok && P.gpuRun?.job !== job) relay('cancel', { job }).catch(() => {}); }
   }).then(ok2 => { if (ok2) { autoRender = true; goStep('film'); } });
 });
 
@@ -4459,16 +4468,48 @@ function syncWorkspaceState() {
   $('#workspaceMode').textContent = summary.label;
   $('#workspaceFootage').textContent = `${summary.ready} / ${summary.total} video shots`;
   $('#workspaceFootage').dataset.ready = String(summary.total > 0 && summary.ready === summary.total);
-  $('#workspaceGpu').textContent = relayHasMotion() ? 'GPU connected' : 'GPU unavailable';
+  $('#workspaceGpu').textContent = relayHasMotion() ? 'GPU service enabled' : 'GPU unavailable';
   $('#workspaceGpu').classList.toggle('warn', !relayHasMotion());
   $('#fullMotionBlock').hidden = !summary.blocked;
   if (summary.blocked) $('#fullMotionBlockText').textContent = `${summary.ready} of ${summary.total} shots have footage. ${summary.total - summary.ready} still need video. Full-motion export waits for actual clips. Use the storyboard to retry unfinished shots or import footage.`;
 }
+$('#btnRetryMissingMotion').onclick = () => {
+  if (!P || job) { toast('Wait for the current step or cancel waiting first.'); return; }
+  if (P.gpuRun) { $('#btnCollect').click(); return; }
+  const missing = missingFootage(P);
+  if (!missing.length) { toast('All cinematic shots have footage.'); return; }
+  picked.clear(); missing.forEach(i => picked.add(i)); renderScenes(); goStep('scenes');
+  if (!job) fixShots('animate');
+};
+$('#btnAlternateFootage').onclick = () => { if (P?.scenes?.length) $('#btnHandoff').click(); };
 $('#btnUseBasic').onclick = () => {
   if (!P || job) { toast('Cancel the current job before changing the film mode.'); return; }
   P.options.motion = 'live'; $('#optMotion').value = 'live'; autoRender = false;
   save(); syncWorkspaceState(); enterFilm().catch(e => toast(e.message, true, 10000));
 };
+
+
+$('#ceJobCancel').onclick = () => job?.abort();
+document.addEventListener('click', e => {
+  const tab = e.target.closest('[data-ribbon]');
+  if (tab) {
+    $$('.ribbon-tabs [role="tab"]').forEach(b => { const active = b === tab; b.setAttribute('aria-selected', String(active)); b.tabIndex = active ? 0 : -1; });
+    $$('.ribbon-panel').forEach(panel => panel.hidden = panel.id !== 'ribbonPanel-' + tab.dataset.ribbon);
+  }
+  const command = e.target.closest('[data-command]');
+  if (command) $("#" + command.dataset.command)?.click();
+  const focus = e.target.closest('[data-focus]');
+  if (focus) { goStep(focus.dataset.stepTarget); setTimeout(() => { const field = $("#" + focus.dataset.focus); field?.scrollIntoView({block:'center',behavior:'smooth'}); field?.focus(); }, 100); }
+  const audioStart = e.target.closest('[data-dashboard-source]');
+  const importStart = e.target.closest('[data-dashboard-import]');
+  if (audioStart || importStart) { show('newvideo'); if (job) return; if (audioStart) setSource('audio'); else $('#clipsFile').click(); }
+});
+$('.ribbon-tabs').addEventListener('keydown', e => {
+  if (!['ArrowRight','ArrowLeft','Home','End'].includes(e.key)) return;
+  const tabs = $$('.ribbon-tabs [role="tab"]'); let i = tabs.indexOf(document.activeElement); if (i < 0) return;
+  e.preventDefault(); i = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+  tabs[i].click(); tabs[i].focus();
+});
 
 // ============ boot ============
 $('#year').textContent = new Date().getFullYear();
@@ -4476,7 +4517,7 @@ setAuthMode('signin');
 const mode = await Auth.initAuth();
 $('#authModeNote').textContent = mode === 'local' ? 'Accounts are saved on this device.' : 'Secured by Google Firebase Authentication.';
 if (mode === 'local') $('#btnGoogle').hidden = true, $('.divider').hidden = true;
-show('landing');
+show(user ? 'projects' : 'landing');
 
 // Local end-to-end tests only (never on the live site): a handle on the open film.
 if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.vfDebug = {

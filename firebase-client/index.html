@@ -16,26 +16,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@400;600;800&family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=57">
-<link rel="stylesheet" href="workspace.css?v=58">
+<link rel="stylesheet" href="workspace.css?v=59">
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="#" data-go="landing" aria-label="VoiceFrame home">
+  <a class="brand" href="#" data-go="home" aria-label="VoiceFrame home">
     <img src="assets/icon.svg" alt="" width="30" height="30">
-    <span>Voice<b>Frame</b></span>
+    <span>VoiceFrame<small>STUDIO</small></span>
   </a>
   <nav class="topnav">
     <a href="#features" data-go="landing" data-scroll="features" class="guest-only">Features</a>
     <a href="#templates" data-go="landing" data-scroll="templates" class="guest-only">Templates</a>
     <a href="#how" data-go="landing" data-scroll="how" class="guest-only">How it works</a>
     <a href="#faq" data-go="landing" data-scroll="faq" class="guest-only">FAQ</a>
-    <a href="#" data-go="projects" class="auth-only">My films</a>
+    <a href="#" data-go="projects" class="auth-only"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
     <a href="#" data-go="studio" class="auth-only">Studio</a>
     <a href="#" data-go="chars" class="auth-only">Characters</a>
   </nav>
   <div class="topbar-right">
-    <button class="btn btn-ghost btn-sm auth-only btn-bar" data-go="newvideo" title="Start a new video"><span aria-hidden="true">🎬</span><span class="lbl"> New video</span></button>
-    <button class="btn btn-primary btn-sm auth-only btn-bar" data-go="designpop" title="Character design: describe a character, use ChatGPT, Gemini and other free AI tools, or start from a saved one"><span aria-hidden="true">🎨</span><span class="lbl"> Character design</span></button>
+    <button class="btn btn-ghost btn-sm auth-only btn-bar" data-go="newvideo" title="Start a new video"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New video</span></button>
+    <button class="btn btn-primary btn-sm auth-only btn-bar" data-go="designpop" title="Character design: describe a character, use ChatGPT, Gemini and other free AI tools, or start from a saved one"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span class="lbl">Character design</span></button>
     <button class="btn btn-ghost btn-sm" id="btnInstall" hidden>⤓ Install app</button>
     <button class="icon-btn" id="btnSettings" title="Settings" aria-label="Settings">
       <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" transform="translate(-1 0)"/></svg>
@@ -215,17 +215,13 @@
 </section>
 
 <!-- ============ PROJECTS ============ -->
-<section id="view-projects" class="view" hidden>
-  <div class="page">
-    <div class="page-head">
-      <h2>My films</h2>
-      <div class="head-actions"><button class="btn btn-ghost" data-go="designer">🧑‍🎨 Character designer</button><button class="btn btn-ghost" data-go="chars">📚 Characters</button><button class="btn btn-primary" id="btnNewProject">+ New film</button></div>
-    </div>
-    <div class="projects-grid" id="projectsGrid"></div>
-    <p class="muted empty" id="projectsEmpty" hidden>No films yet. Your first one is a sentence away.</p>
-  </div>
-</section>
-
+<section id="view-projects" class="view" hidden><div class="dashboard-shell"><aside class="dash-sidebar"><p class="nav-caption">WORKSPACE</p><a class="selected" href="#" data-go="projects"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</a><a href="#" data-go="studio"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg>Video studio</a><a href="#" data-go="chars"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>Characters</a><button data-go="designpop"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 10l4 4M5 3v6M2 6h6M19 2v4M17 4h4"/></svg>Character designer</button><div class="sidebar-bottom"><div class="workspace-account"><span>VF</span><div><b>Personal workspace</b><small>Saved on this device</small></div></div><p>One story. Every frame.</p></div></aside><main class="dashboard-main">
+<div class="dashboard-top"><div><p class="dash-breadcrumb">WORKSPACE / OVERVIEW</p><h1>Your creative workspace</h1><p>Turn your next idea into a story worth watching.</p></div><button type="button" class="btn btn-primary" id="btnNewProject"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Create video</span></button></div>
+<div class="dash-hero"><div class="dash-hero-copy"><span class="section-label">YOUR NEXT PRODUCTION</span><h2>Great stories start<br>with a single idea.</h2><p>Write a prompt, build your cast and direct your film.<br>All your creative tools, in one workspace.</p><button type="button" class="btn btn-primary" data-go="newvideo"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 10l4 4M5 3v6M2 6h6M19 2v4M17 4h4"/></svg><span>Start a new video</span></button><button type="button" class="btn btn-ghost" data-go="designpop"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span>Design a character</span></button></div><div class="dash-hero-art"><img src="assets/show/shot3.jpg" alt="Cinematic scene from a VoiceFrame sample film"><span class="sample-label">VOICEFRAME SAMPLE</span><div class="hero-frame-line"></div></div></div>
+<div class="dash-tools"><button data-go="newvideo"><span class="tool-tile-icon blue"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 10l4 4M5 3v6M2 6h6M19 2v4M17 4h4"/></svg></span><span><b>Text to video</b><small>Start with a written idea</small></span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button data-dashboard-source="audio"><span class="tool-tile-icon teal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg></span><span><b>Audio to video</b><small>Bring your own narration</small></span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button data-go="designpop"><span class="tool-tile-icon peach"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span><span><b>Character studio</b><small>Create a consistent cast</small></span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button data-dashboard-import><span class="tool-tile-icon lavender"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V3m-4 4 4-4 4 4M4 15v5h16v-5"/></svg></span><span><b>Import footage</b><small>Build a film from your clips</small></span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button></div>
+<div class="dashboard-lower"><section class="recent-section"><div class="section-heading"><div><h2>Recent projects <span id="dashboardProjectCount">0</span></h2><p>Pick up where you left off.</p></div><label class="project-search"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="projectSearch" type="search" placeholder="Search projects" aria-label="Search projects"></label></div><div class="projects-grid" id="projectsGrid"></div><div class="dashboard-empty" id="projectsEmpty" hidden><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h7l2 3h9v11H3z"/></svg><h3 id="projectsEmptyTitle">Your first film starts here</h3><p id="projectsEmptyText">Create a video and it will appear in this workspace.</p><button type="button" class="btn btn-ghost" data-go="newvideo"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Create a video</span></button></div></section><aside class="dashboard-guide"><span class="section-label">QUICK START</span><h3>From idea to final cut</h3><ol><li><span>01</span><div><b>Write your story</b><p>A prompt, script or audio file.</p></div></li><li><span>02</span><div><b>Build your cast</b><p>Define faces, looks and voices.</p></div></li><li><span>03</span><div><b>Direct every shot</b><p>Review footage and refine scenes.</p></div></li><li><span>04</span><div><b>Export your film</b><p>Download and share your work.</p></div></li></ol><div class="guide-note"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><p>Full AI motion uses a shared GPU. Availability and generation time vary.</p></div></aside></div>
+<section class="dash-starters"><div class="section-heading"><div><h2>Start with a story</h2><p>A little inspiration for your next production.</p></div></div><div class="starter-grid"><button data-go="newvideo" data-tpl="4"><img src="assets/show/shot1.jpg" alt=""><span><b>Family drama</b><small>A story with heart</small></span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button data-go="newvideo" data-tpl="6"><img src="assets/show/shot4.jpg" alt=""><span><b>History &amp; education</b><small>Bring an idea to life</small></span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button data-go="newvideo" data-tpl="5"><img src="assets/show/shot5.jpg" alt=""><span><b>Motivational story</b><small>Make an impact</small></span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button></div></section>
+</main></div></section>
 
 <!-- ============ CHARACTER EDITOR (a film's character, or the stand-alone designer) ============ -->
 <section id="view-chared" class="view chared" hidden>
@@ -252,7 +248,7 @@
       <div class="chips ce-ages" id="ceAgePresets"></div>
       <p class="tiny ce-minor" id="ceMinorNote" hidden>Under 18: only ordinary, age-appropriate everyday, school, festive and traditional clothes are offered and painted.</p>
       <button type="button" class="ce-outfit" id="ceOutfit"><span>👗 Outfit</span><small id="ceOutfitName"></small></button>
-      <label class="field ce-info"><span>Character info</span><textarea id="ceInfo" rows="6" maxlength="1200" placeholder="Describe how your character looks and acts…"></textarea></label>
+      <label class="field ce-info"><span>Character info</span><textarea id="ceInfo" rows="6" placeholder="Describe how your character looks and acts…"></textarea></label>
       <p class="tiny muted">The story writer, the casting director and the AI Director read this to write and direct scenes with your character.</p>
       <details class="ce-more"><summary>More details (for the directory and the prompts)</summary>
         <label class="field"><span>Role</span><select id="ceRole"><option>protagonist</option><option>ally</option><option>antagonist</option><option>mentor</option><option>other</option></select></label>
@@ -268,8 +264,8 @@
           <button type="button" role="tab" data-tab="search" aria-selected="false">🔎 Search</button>
         </div>
         <div class="ce-pane" data-pane="words" role="tabpanel">
-          <label class="field"><span>Start from words</span><textarea id="ceDescribe" rows="3" maxlength="800" placeholder="e.g. a cheerful 22-year-old college student from Pune who loves street food and photography"></textarea></label>
-          <button type="button" class="btn btn-primary" id="ceDesign">✨ Design this character</button>
+          <label class="field"><span>Start from words</span><textarea aria-describedby="characterPromptHelp" id="ceDescribe" rows="3" placeholder="e.g. a cheerful 22-year-old college student from Pune who loves street food and photography"></textarea></label>
+          <p id="characterPromptHelp" class="tiny muted">No fixed input-length limit. Your full prompt is kept; long prompts are prepared in sections for the AI service.</p><button type="button" class="btn btn-primary" id="ceDesign">✨ Design this character</button>
           <p class="tiny muted">AI writer: open-source (gpt-oss) writes the casting brief; the free FLUX painter paints a photo-real person who does not exist.</p>
           <div class="row"><label class="btn btn-ghost btn-sm">⬆ Upload character<input type="file" id="ceUpload" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" hidden></label></div>
         </div>
@@ -286,10 +282,10 @@
       </div>
     </aside>
     <main class="ce-center">
-      <div class="ce-stage" id="ceStage"><img id="ceImg" alt="" hidden><div class="ce-empty" id="ceEmpty"></div></div>
+      <div class="ce-job" id="ceJobState" role="status" hidden><span class="spinner"></span><div><b id="ceJobTitle">Preparing character…</b><span id="ceJobDetail"></span></div><button type="button" class="btn btn-ghost btn-sm" id="ceJobCancel">Cancel</button></div><p id="ceJobResult" class="ce-job-result" role="alert"></p><div class="ce-stage" id="ceStage"><img id="ceImg" alt="" hidden><div class="ce-empty" id="ceEmpty"></div></div>
       <div class="ce-toggle" id="ceToggle"><button type="button" data-view="portrait" class="on">🙂 Portrait</button><button type="button" data-view="sheet">🧍 Full body</button></div>
       <form class="ce-change" id="ceChange">
-        <textarea id="ceAsk" rows="2" maxlength="300" placeholder="What do you want to change?"></textarea>
+        <textarea id="ceAsk" rows="2" placeholder="What do you want to change?"></textarea>
         <div class="ce-change-row">
           <label class="icon-btn" title="Upload a picture as a new version">＋<input type="file" id="ceUpload2" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" hidden></label>
           <select id="ceFormat" title="Format"><option value="sheet">▭ Sheet 4:3</option><option value="square">◻ Square</option><option value="portrait">▯ Portrait 3:4</option><option value="wide">▬ Wide 16:9</option></select>
@@ -348,6 +344,7 @@
         <div class="workspace-heading"><small>VOICEFRAME / FILM WORKSPACE</small><strong id="workspaceProjectName">Untitled project</strong></div>
         <div class="workspace-state"><span class="workspace-pill" id="workspaceMode">Full AI motion</span><span class="workspace-pill" id="workspaceFootage">0 shots</span><span class="workspace-pill" id="workspaceGpu">GPU status</span><button class="btn btn-ghost btn-sm" type="button" data-next="film">Preview &amp; export ↗</button></div>
       </header>
+<section class="editor-ribbon" aria-label="Video editing ribbon"><div class="ribbon-tabs" role="tablist" aria-label="Editing tools"><button role="tab" id="ribbonTab-create" aria-controls="ribbonPanel-create" aria-selected="true" data-ribbon="create" tabindex="0"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 10l4 4M5 3v6M2 6h6M19 2v4M17 4h4"/></svg>Create</button><button role="tab" id="ribbonTab-edit" aria-controls="ribbonPanel-edit" aria-selected="false" data-ribbon="edit" tabindex="-1"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 4 5 5M4 20l4-1L21 6l-5-5L3 14z"/></svg>Edit</button><button role="tab" id="ribbonTab-audio" aria-controls="ribbonPanel-audio" aria-selected="false" data-ribbon="audio" tabindex="-1"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg>Audio</button><button role="tab" id="ribbonTab-captions" aria-controls="ribbonPanel-captions" aria-selected="false" data-ribbon="captions" tabindex="-1"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9H7v6h3m7-6h-3v6h3"/></svg>Captions</button><button role="tab" id="ribbonTab-export" aria-controls="ribbonPanel-export" aria-selected="false" data-ribbon="export" tabindex="-1"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7m0-7L10 14M10 4H4v16h16v-6"/></svg>Export</button></div><div class="ribbon-panel" id="ribbonPanel-create" role="tabpanel" aria-labelledby="ribbonTab-create" ><button type="button" class="" data-next="story"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg><span>Story</span></button><button type="button" class="" data-next="characters"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span>Cast</span></button><button type="button" class="" data-go="designpop"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 10l4 4M5 3v6M2 6h6M19 2v4M17 4h4"/></svg><span>Character designer</span></button><button type="button" class="" data-command="clipsFile"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V3m-4 4 4-4 4 4M4 15v5h16v-5"/></svg><span>Import clips</span></button><span class="ribbon-context"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg>PRODUCTION TOOLS</span></div><div class="ribbon-panel" id="ribbonPanel-edit" role="tabpanel" aria-labelledby="ribbonTab-edit" hidden><button type="button" class="" data-next="scenes"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Storyboard</span></button><button type="button" class="" data-command="btnDirector"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 4 5 5M4 20l4-1L21 6l-5-5L3 14z"/></svg><span>AI Director</span></button><button type="button" class="" data-next="film"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4 13 8-13 8z"/></svg><span>Film preview</span></button><span class="ribbon-context"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg>PRODUCTION TOOLS</span></div><div class="ribbon-panel" id="ribbonPanel-audio" role="tabpanel" aria-labelledby="ribbonTab-audio" hidden><button type="button" class="" data-next="sound"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></svg><span>Voice & narration</span></button><button type="button" class="" data-focus="optMusicVol" data-step-target="sound"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg><span>Music & ambience</span></button><span class="ribbon-context"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg>PRODUCTION TOOLS</span></div><div class="ribbon-panel" id="ribbonPanel-captions" role="tabpanel" aria-labelledby="ribbonTab-captions" hidden><button type="button" class="" data-focus="optCaptions" data-step-target="sound"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9H7v6h3m7-6h-3v6h3"/></svg><span>Caption style</span></button><button type="button" class="" data-next="film"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg><span>Preview captions</span></button><span class="ribbon-context"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg>PRODUCTION TOOLS</span></div><div class="ribbon-panel" id="ribbonPanel-export" role="tabpanel" aria-labelledby="ribbonTab-export" hidden><button type="button" class="" data-next="film"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4 13 8-13 8z"/></svg><span>Preview film</span></button><button type="button" class="" data-next="film"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7m0-7L10 14M10 4H4v16h16v-6"/></svg><span>Render & download</span></button><span class="ribbon-context"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/></svg>PRODUCTION TOOLS</span></div></section>
       <div class="statusbar" id="statusbar" hidden>
         <div class="spinner"></div>
         <div class="status-text"><b id="statusTitle">Working…</b><span id="statusDetail"></span></div>
@@ -357,13 +354,13 @@
       </div>
 
       <!-- STEP 1: IDEA -->
-      <div class="panel" data-panel="idea">
+      <div class="panel idea-workspace" data-panel="idea"><div class="creation-main">
         <div class="tabs small" role="tablist">
-          <button class="tab active" data-source="idea">✍️ From an idea</button>
-          <button class="tab" data-source="audio">🎧 From my audio</button>
+          <button class="tab active" data-source="idea"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 4 5 5M4 20l4-1L21 6l-5-5L3 14z"/></svg> Text prompt</button>
+          <button class="tab" data-source="audio"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg> Audio input</button>
         </div>
         <div data-sourcepanel="idea">
-          <h2>What's your story about?</h2>
+          <p class="section-label">CREATE WITH AI</p><h2>What will you create today?</h2>
           <p class="muted">Speak or type a line or two, paste a whole story, or start from a template.</p>
           <div class="idea-box">
             <textarea id="ideaInput" rows="5" maxlength="8000" placeholder="e.g. A lonely lighthouse keeper in Kerala finds a glowing fish that can grant one wish, but every wish costs a memory…"></textarea>
@@ -397,7 +394,11 @@
           <label class="check"><input type="checkbox" id="optDenoise" checked> <span>Clean up background noise</span></label>
         </div>
 
-        <div class="options-grid">
+        <div class="actions">
+          <button class="btn btn-primary btn-lg" id="btnAuto"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 10l4 4M5 3v6M2 6h6M19 2v4M17 4h4"/></svg> Generate film</button>
+          <button class="btn btn-ghost btn-lg" id="btnStoryOnly">Review story first</button>
+        </div>
+        </div><aside class="creation-settings"><div class="settings-heading"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="8" cy="7" r="2" fill="currentColor"/><circle cx="16" cy="17" r="2" fill="currentColor"/></svg><div><h3>Video settings</h3><p>Set the direction for your film.</p></div></div><div class="options-grid">
           <label class="field"><span>Genre</span>
             <select id="optGenre">
               <option value="auto">Auto (from idea)</option><option>Fantasy</option><option>Adventure</option><option>Drama</option><option>Mystery</option><option>Sci-fi</option><option>Horror</option><option>Romance</option><option>Comedy</option><option>Mythology</option><option>Kids / fable</option><option>Motivational</option><option>History</option>
@@ -433,29 +434,26 @@
               <option>English</option><option>Hindi</option><option>Bhojpuri</option><option>Bengali</option><option>Marathi</option><option>Telugu</option><option>Kannada</option><option>Gujarati</option><option>Maithili</option><option>Magahi</option><option>Chhattisgarhi</option><option>Tamil</option><option>Malayalam</option>
             </select></label>
         </div>
-        <label class="check"><input id="optStock" type="checkbox" checked><span><b>Real footage:</b> scenery shots with no main character (a village at dawn, diyas, a crowd, leaves in the wind) use real free stock video from Pexels or Wikimedia Commons, credited at the end</span></label>
-        <label class="check"><input id="optCheck" type="checkbox" checked><span><b>Cast check:</b> an AI compares every picture with the script and the cast portraits (right people, gender, age, faces, hands, no stray text) and repaints the ones that are wrong</span></label>
+        <label class="check"><input id="optStock" type="checkbox" checked><span>Use stock footage for scenery shots</span></label>
+        <label class="check"><input id="optCheck" type="checkbox" checked><span>Check character consistency</span></label>
         <div class="gpu-opts" id="gpuMotionRow">
           <p class="tiny" id="gpuState"></p>
           <label class="field"><span>Character motion</span>
             <select id="optMotion">
-              <option value="live">⚡ Basic motion (browser animation): lips, eyes, expressions, small gestures on still pictures. No real walking. Ready in minutes, ₹0</option>
-              <option value="hero">🎬 Realistic motion for key shots (AI video on the free GPU): up to 12 action and speaking shots get real movement (about 25 min); the rest basic motion</option>
-              <option value="full" selected>🎞 Realistic motion for every shot (AI video on the free GPU): real walking, gestures and lip-sync everywhere (about 1½ h for 5 minutes; keep this tab open)</option>
+              <option value="live">Basic animation · still images</option>
+              <option value="hero">Hybrid motion · selected shots</option>
+              <option value="full" selected>Full AI motion · every shot</option>
             </select></label>
           <label class="check"><input id="optEnhance" type="checkbox" checked><span><b>HD upscale</b> of the motion clips (sharper; slightly bigger downloads)</span></label>
         </div>
 
-        <div class="lib-row" id="libRow" hidden><span class="tiny muted">⭐ My characters (tap to cast them in this film):</span><div class="chips" id="libChips"></div></div>
+        </aside><div class="creation-footer"><div class="lib-row" id="libRow" hidden><span class="tiny muted">⭐ My characters (tap to cast them in this film):</span><div class="chips" id="libChips"></div></div>
         <p class="tiny muted char-entry"><button class="btn btn-ghost btn-sm" type="button" data-go="designer">🧑‍🎨 Character designer</button> <button class="btn btn-ghost btn-sm" type="button" data-go="chars">📚 Character directory</button> Design a character once (look, outfit, voice, reference sheet) and cast them in any film.</p>
         <p class="tiny muted">🕺 Controlled motion: in the storyboard, <b>Copy motion</b> on a shot makes its character follow a video of yours (read on your device).</p>
         <p class="tiny muted">Made your clips elsewhere (e.g. Google Flow)? <label class="btn btn-ghost btn-sm" title="One shot per clip, in file-name order; each clip keeps its own speech, transcribed as subtitles">🎞 Film from my clips<input type="file" id="clipsFile" accept="video/*,.mp4,.webm,.mov" multiple hidden></label></p>
         <p class="tiny muted">New to realistic motion? <button class="btn btn-ghost btn-sm" id="btnMotionTest" type="button">🧪 Motion test</button> makes 4 short shots on the free GPU (a walk, writing, a Hindi conversation, a hand-over) so you can judge the motion before a long film.</p>
-        <div class="actions">
-          <button class="btn btn-primary btn-lg" id="btnAuto">🎬 Create full film automatically</button>
-          <button class="btn btn-ghost btn-lg" id="btnStoryOnly">Write the story first, then review each step</button>
-        </div>
-        <p class="tiny muted" id="speedNote"></p>
+
+        <p class="tiny muted" id="speedNote"></p></div>
       </div>
 
       <!-- STEP 2: STORY -->
@@ -583,7 +581,7 @@
         </div>
         <div class="quality-block" id="fullMotionBlock" role="status" hidden>
           <strong>Full-motion footage is still being prepared</strong><p id="fullMotionBlockText"></p>
-          <div class="actions"><button class="btn btn-ghost btn-sm" type="button" data-next="scenes">Open unfinished shots</button><button class="btn btn-ghost btn-sm" type="button" id="btnUseBasic">Use basic animation instead</button></div>
+          <div class="actions"><button class="btn btn-primary btn-sm" type="button" id="btnRetryMissingMotion">Retry unfinished clips</button><button class="btn btn-ghost btn-sm" type="button" id="btnAlternateFootage">Other video tools / import</button><button class="btn btn-ghost btn-sm" type="button" data-next="scenes">Review shots</button><button class="btn btn-ghost btn-sm" type="button" id="btnUseBasic">Use basic animation instead</button></div>
         </div>
         <div class="film-layout">
           <div class="player">
@@ -783,7 +781,7 @@
 
 <dialog id="designDlg" class="dialog dz-dialog" aria-label="Character design">
   <header class="vp-head"><div><h2>🎨 Character design</h2><span class="tiny muted">Write who you want, then choose the AI that designs them.</span></div><button type="button" class="icon-btn" id="dzClose" aria-label="Close">✕</button></header>
-  <label class="field"><span>Your character prompt</span><textarea id="dzPrompt" rows="4" maxlength="800" placeholder="e.g. a cheerful 24-year-old potter from a Rajasthan village, warm smile, clay on her hands, mustard cotton lehenga, silver earrings"></textarea></label>
+  <label class="field"><span>Your character prompt</span><textarea id="dzPrompt" rows="4" placeholder="e.g. a cheerful 24-year-old potter from a Rajasthan village, warm smile, clay on her hands, mustard cotton lehenga, silver earrings"></textarea></label>
   <div class="dz-row">
     <label class="field"><span>Name</span><input id="dzName" maxlength="40" placeholder="optional"></label>
     <label class="field"><span>Gender</span><select id="dzGender"><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other / unspecified</option></select></label>
@@ -828,6 +826,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="js/config.js?v=30"></script>
-<script type="module" src="js/app.js?v=58"></script>
+<script type="module" src="js/app.js?v=59"></script>
 </body>
 </html>

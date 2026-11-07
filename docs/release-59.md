@@ -1,0 +1,11 @@
+# Professional dashboard and character prompt repair
+
+Release 59 replaces the initial workspace redesign with a dashboard, recent-project search, quick creation cards, a restrained blue/graphite visual system and a new vector logo. Signed-in users land in their project dashboard. The studio has an accessible keyboard-operable Create / Edit / Audio / Captions / Export ribbon linked to existing actions, plus separate prompt and settings columns. The mobile layout uses compact scrolling navigation and toolbars.
+
+Character prompts no longer have the previous 800/300-character browser limits or the 800-character writer truncation. Full input is retained with the saved character. Long descriptions are read in sections to prepare a shorter model brief; this does not remove provider context limits, quotas or moderation. The editor now shows generation progress, cancellation and persistent failure messages, and disables conflicting editor actions while busy. Prompts are no longer logged to the browser console.
+
+Full-motion fallback offers retrying only unfinished clips, collecting an existing run, or importing footage made in another tool. Completed footage is retained. Cancelling the wait does not cancel an active saved GPU run. Basic animation remains an explicit choice. No new paid provider or automatic external-provider fallback is configured.
+
+Live worker test: a five-shot short eventually exported a 17.43-second MP4 under the older running v57 client. Four shot cards showed AI video; one clip was rejected by the safety filter, and outfit/hand-motion warnings appeared. This is not a verified successful full-motion film. Release 58/59's footage guard prevents that missing shot from silently becoming still animation in full mode. The GPU worker and relay source are absent from both accessible GitHub branches.
+
+Validation: 27 Node regression tests pass, including decoder failure, early render-state cleanup, full-footage readiness, imported media cleanup, and long prompt preservation. Desktop and phone-width browser checks are recorded separately. Production authentication and database schema remain unchanged. Preview authentication fixtures and QA pages are excluded from deployment and version control.

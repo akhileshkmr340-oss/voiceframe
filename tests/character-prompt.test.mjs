@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {promptChunks,compactPrompt} from '../firebase-client/js/character-prompt.js';
+test('long input is split without dropping its ending or spaces',()=>{const s=('Detailed fictional character. '.repeat(800))+'FINAL DETAIL';const parts=promptChunks(s);assert.equal(parts.join(''),s);assert.ok(parts.every(x=>x.length<=6000));});
+test('normal prompts pass through unchanged without a service request',async()=>{const s='A fictional adult with a blue jacket.';assert.equal(await compactPrompt(s,{summarize(){throw Error('should not call')}}),s);});
+test('every section of a long prompt reaches the summary service',async()=>{const s='a'.repeat(6200)+'final outfit detail',seen=[];const result=await compactPrompt(s,{summarize:async part=>{seen.push(part);return part.includes('final outfit')?'final outfit detail':'face detail'}});assert.equal(seen.join(''),s);assert.match(result,/final outfit detail/);});
+test('empty or non-shortening responses fail rather than silently cutting input',async()=>{const s='abc'.repeat(3000);await assert.rejects(compactPrompt(s,{summarize:async()=>''}),/no brief/);await assert.rejects(compactPrompt(s,{summarize:async p=>p}),/could not shorten/);});
+test('cancellation prevents further service calls',async()=>{const c=new AbortController();c.abort();await assert.rejects(compactPrompt('x'.repeat(7000),{signal:c.signal,summarize:async()=>{throw Error('must not call')}}),{name:'AbortError'});});
