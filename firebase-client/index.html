@@ -3,16 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VoiceFrame Studio — Speak a story, get a cinematic film</title>
-<meta name="description" content="Turn a spoken or written idea into a full story, original characters and a narrated cinematic video. Free, copyright-safe, ready for YouTube, Shorts and Reels.">
+<title>VoiceFrame Studio: AI films from one line</title>
+<meta name="description" content="Free AI film studio: type, speak or upload a story and get a film where characters move and talk. Consistent cast, lip-sync, 126 languages including 18 Indian ones, Shorts, translation and HD. Open-source models, no watermark.">
 <meta name="theme-color" content="#0b0a12">
 <meta property="og:title" content="VoiceFrame Studio">
-<meta property="og:description" content="Speak a story. Get a cinematic film — with voice, music and original characters.">
+<meta property="og:description" content="Turn one line into a film where characters move and talk. Free, open-source AI, 126 languages.">
+<meta property="og:image" content="assets/sample-poster.jpg">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=23">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@400;600;800&family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=57">
+<link rel="stylesheet" href="workspace.css?v=58">
 </head>
 <body>
 <header class="topbar">
@@ -21,13 +25,18 @@
     <span>Voice<b>Frame</b></span>
   </a>
   <nav class="topnav">
-    <a href="flow.html" data-flow>Flow assembly ↗</a>
-    <a href="#how" data-go="landing" data-scroll="how">How it works</a>
-    <a href="#safe" data-go="landing" data-scroll="safe">Copyright-safe</a>
+    <a href="#features" data-go="landing" data-scroll="features" class="guest-only">Features</a>
+    <a href="#templates" data-go="landing" data-scroll="templates" class="guest-only">Templates</a>
+    <a href="#how" data-go="landing" data-scroll="how" class="guest-only">How it works</a>
+    <a href="#faq" data-go="landing" data-scroll="faq" class="guest-only">FAQ</a>
     <a href="#" data-go="projects" class="auth-only">My films</a>
     <a href="#" data-go="studio" class="auth-only">Studio</a>
+    <a href="#" data-go="chars" class="auth-only">Characters</a>
   </nav>
   <div class="topbar-right">
+    <button class="btn btn-ghost btn-sm auth-only btn-bar" data-go="newvideo" title="Start a new video"><span aria-hidden="true">🎬</span><span class="lbl"> New video</span></button>
+    <button class="btn btn-primary btn-sm auth-only btn-bar" data-go="designpop" title="Character design: describe a character, use ChatGPT, Gemini and other free AI tools, or start from a saved one"><span aria-hidden="true">🎨</span><span class="lbl"> Character design</span></button>
+    <button class="btn btn-ghost btn-sm" id="btnInstall" hidden>⤓ Install app</button>
     <button class="icon-btn" id="btnSettings" title="Settings" aria-label="Settings">
       <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" transform="translate(-1 0)"/></svg>
     </button>
@@ -44,64 +53,138 @@
 <!-- ============ LANDING ============ -->
 <section id="view-landing" class="view">
   <div class="hero">
-    <canvas id="heroCanvas" aria-hidden="true"></canvas>
     <div class="hero-inner">
-      <p class="eyebrow">AI film studio · free · runs in your browser</p>
-      <h1>Speak a story.<br><span class="grad">Get a cinematic film.</span></h1>
-      <p class="lead">Say or type one line. VoiceFrame writes the full story, designs the characters, paints every scene, then narrates and scores it into a video you can download and post to YouTube, Shorts, Reels or WhatsApp.</p>
-      <div class="hero-cta">
-        <button class="btn btn-primary btn-lg" data-go="studio">
-          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1A7 7 0 0 0 19 12h-2Z"/></svg>
-          Create my film
-        </button>
-        <a class="btn btn-ghost btn-lg" href="#how" data-scroll="how">See how it works</a>
+      <div class="hero-copy">
+        <p class="eyebrow">Free AI film studio · open-source models · no watermark</p>
+        <h1>One line in.<br><span class="grad">Direct your story, shot by shot.</span></h1>
+        <p class="lead">Type, speak or upload your story. VoiceFrame writes it, casts it, paints every shot, animates the characters, syncs their lips to their voices and scores it, in Hindi and 125 more languages.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-lg" data-go="studio">🎬 Create my film</button>
+          <a class="btn btn-ghost btn-lg" href="#showcase" data-scroll="showcase">▶ See a sample</a>
+        </div>
+        <ul class="hero-stats">
+          <li><b>126</b><span>languages</span></li>
+          <li><b>15 min</b><span>longest film</span></li>
+          <li><b>100%</b><span>open-source AI</span></li>
+          <li><b>₹0</b><span>no watermark</span></li>
+        </ul>
       </div>
-      <ul class="hero-badges">
-        <li>🎙️ Voice or text input</li><li>🎭 Original characters</li><li>🎬 1080p MP4</li><li>🛡️ Copyright-safe</li>
-      </ul>
+      <div class="hero-reel">
+        <video src="assets/sample-reel.mp4" poster="assets/sample-poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Sample shots made with VoiceFrame"></video>
+        <span class="reel-tag">Made with VoiceFrame · AI motion + lip-sync</span>
+      </div>
     </div>
   </div>
 
-  <section class="section" id="how">
-    <h2 class="section-title">From one sentence to a finished film</h2>
-    <div class="pipeline">
-      <article class="pipe-card"><span class="pipe-n">1</span><h3>Speak or write</h3><p>Dictate your idea in English or Hindi, or type it. Voice commands like <em>“create film”</em> work too.</p></article>
-      <article class="pipe-card"><span class="pipe-n">2</span><h3>Full story</h3><p>An AI writer expands it into a complete story with a beginning, a turn and an ending, split into cinematic scenes.</p></article>
-      <article class="pipe-card"><span class="pipe-n">3</span><h3>Character design</h3><p>Each character gets a look, a personality, a portrait and a voice, and stays consistent across scenes.</p></article>
-      <article class="pipe-card"><span class="pipe-n">4</span><h3>Scenes &amp; camera</h3><p>Every scene is painted and given a camera move: push-ins, pans, light, grain and colour grading.</p></article>
-      <article class="pipe-card"><span class="pipe-n">5</span><h3>Voice &amp; score</h3><p>A neural narrator voices the story. An original soundtrack is composed for your film alone.</p></article>
-      <article class="pipe-card"><span class="pipe-n">6</span><h3>Download &amp; post</h3><p>Export MP4 in 16:9, 9:16 or 1:1, then share to YouTube, Instagram, Facebook, X, LinkedIn or WhatsApp.</p></article>
+  <section class="section" id="showcase">
+    <h2 class="section-title">Build a cast. Direct every shot.</h2>
+    <p class="section-sub">From one Hindi idea set in Varanasi: six characters designed once, then kept the same through 78 shots of a 5:44 film.</p>
+    <div class="cast-strip">
+      <img src="assets/show/cast1.jpg" alt="" loading="lazy"><img src="assets/show/cast2.jpg" alt="" loading="lazy"><img src="assets/show/cast3.jpg" alt="" loading="lazy">
+      <img src="assets/show/cast4.jpg" alt="" loading="lazy"><img src="assets/show/cast5.jpg" alt="" loading="lazy"><img src="assets/show/cast6.jpg" alt="" loading="lazy">
+    </div>
+    <div class="shot-strip">
+      <img src="assets/show/shot1.jpg" alt="" loading="lazy"><img src="assets/show/shot2.jpg" alt="" loading="lazy"><img src="assets/show/shot3.jpg" alt="" loading="lazy">
+      <img src="assets/show/shot4.jpg" alt="" loading="lazy"><img src="assets/show/shot5.jpg" alt="" loading="lazy"><img src="assets/show/shot6.jpg" alt="" loading="lazy">
     </div>
   </section>
 
-  <section class="section safe" id="safe">
-    <div class="safe-grid">
-      <div>
-        <h2 class="section-title left">Review rights before publishing</h2>
-        <p class="muted">Each video includes a source report. Generated content and source licences still need review; this app cannot guarantee copyright clearance.</p>
-        <ul class="checklist">
-          <li><b>Original story.</b> Prompts are screened for franchise characters, brands and song lyrics. Those get turned into original creations.</li>
-          <li><b>Generated visuals.</b> Scenes are AI-generated for your film, or public-domain (CC0/PDM) stock with full source records.</li>
-          <li><b>Unique music.</b> The soundtrack is synthesised note by note in your browser, so there's no third-party track to trigger Content ID.</li>
-          <li><b>Synthetic voice.</b> Narration comes from the open Kokoro-82M voice model (Apache-2.0). No real person's voice is cloned.</li>
-          <li><b>AI disclosure.</b> Your upload description includes the AI-content label YouTube and Meta ask for.</li>
-        </ul>
-      </div>
-      <div class="safe-card">
-        <div class="safe-shield">🛡️</div>
-        <h3>Licence report included</h3>
-        <p>Download <code>credits.txt</code> with every video: sources, licences, seeds and models. Keep it in case anyone ever asks.</p>
-      </div>
+  <section class="section" id="features">
+    <h2 class="section-title">Everything from idea to upload</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="create" role="tab">✨ Create with AI</button>
+      <button class="tab" data-tab="edit" role="tab">✂️ Edit with AI</button>
+      <button class="tab" data-tab="enhance" role="tab">🚀 Enhance &amp; share</button>
+    </div>
+    <div class="feature-grid" data-tabpanel="create">
+      <article class="feat"><i>📝</i><h3>Text to film</h3><p>One sentence becomes a full story with a hook, a turn and an ending, split into shots like a filmed drama.</p></article>
+      <article class="feat"><i>🎙️</i><h3>Voice to film</h3><p>Dictate your idea in English or Hindi. Say “create film” and it starts.</p></article>
+      <article class="feat"><i>🎧</i><h3>Audio to film <em>New</em></h3><p>Upload your own narration or podcast. It's transcribed, split into shots and filmed to your voice.</p></article>
+      <article class="feat"><i>🎭</i><h3>Consistent cast</h3><p>Each character gets a portrait and a voice, and keeps the same face and clothes in every shot.</p></article>
+      <article class="feat"><i>🖼️</i><h3>AI pictures</h3><p>Every shot is painted from the script, with the cast's faces as references.</p></article>
+      <article class="feat"><i>🎬</i><h3>Real character motion</h3><p>Pictures become moving shots: walking, gestures, expressions, camera moves.</p></article>
+      <article class="feat"><i>👄</i><h3>Lip-sync</h3><p>Speaking characters' mouths are redrawn to match their recorded lines.</p></article>
+      <article class="feat"><i>🎼</i><h3>Original score</h3><p>A soundtrack composed for your film, with ambience and music that ducks under speech.</p></article>
+      <article class="feat"><i>🧩</i><h3>Story templates <em>New</em></h3><p>Kids' moral story, devotional katha, horror, comedy Short, explainer and more, ready to go.</p></article>
+    </div>
+    <div class="feature-grid" data-tabpanel="edit" hidden>
+      <article class="feat"><i>🎞️</i><h3>Storyboard editor <em>New</em></h3><p>Reorder, insert, duplicate or delete shots, and hold any shot longer.</p></article>
+      <article class="feat"><i>✍️</i><h3>Text-based editing <em>New</em></h3><p>Change a line of dialogue: only that line is re-voiced, and its lips re-synced.</p></article>
+      <article class="feat"><i>🛠️</i><h3>Fix one shot <em>New</em></h3><p>Repaint, re-animate or re-sync just the shots you pick, without remaking the film.</p></article>
+      <article class="feat"><i>➡️</i><h3>Extend a shot <em>New</em></h3><p>Continue a moving shot from its last frame with a new action.</p></article>
+      <article class="feat"><i>📷</i><h3>Your own photos &amp; clips</h3><p>Use your photo as a character, or your own picture or video for any shot.</p></article>
+      <article class="feat"><i>🎥</i><h3>Camera moves</h3><p>Push-in, pull-back, pan, tilt or drift for every shot.</p></article>
+      <article class="feat"><i>💬</i><h3>Caption styles <em>New</em></h3><p>Word-by-word karaoke, bold Shorts style, subtitle box or classic.</p></article>
+      <article class="feat"><i>🏷️</i><h3>Channel branding</h3><p>Your logo, channel name and a Subscribe pop-up on every film.</p></article>
+    </div>
+    <div class="feature-grid" data-tabpanel="enhance" hidden>
+      <article class="feat"><i>🔍</i><h3>HD upscale <em>New</em></h3><p>Motion clips are upscaled on the GPU for sharper faces and detail.</p></article>
+      <article class="feat"><i>🌐</i><h3>Video translation <em>New</em></h3><p>The same film in another Indian language: new voices, and lips re-synced to them.</p></article>
+      <article class="feat"><i>📱</i><h3>Smart Short <em>New</em></h3><p>One click cuts a vertical YouTube Short from the strongest moment of your film.</p></article>
+      <article class="feat"><i>🔇</i><h3>Audio clean-up <em>New</em></h3><p>Background noise is removed from your uploaded narration.</p></article>
+      <article class="feat"><i>🎨</i><h3>Film look</h3><p>Colour grade, film grain, letterbox and smooth transitions between scenes.</p></article>
+      <article class="feat"><i>💬</i><h3>Auto captions &amp; SRT</h3><p>Captions burned in, plus a subtitle file for YouTube.</p></article>
+      <article class="feat"><i>⬇️</i><h3>1080p MP4, 3 formats</h3><p>16:9 for YouTube, 9:16 for Shorts and Reels, 1:1 for the feed.</p></article>
+      <article class="feat"><i>🛡️</i><h3>Licence report</h3><p>Every film comes with its sources, licences and models, plus the AI-content label platforms ask for.</p></article>
+    </div>
+  </section>
+
+  <section class="section" id="templates">
+    <h2 class="section-title">Start from a template</h2>
+    <p class="section-sub">Pick one, change the idea if you like, and create.</p>
+    <div class="tpl-grid" id="tplGrid"></div>
+  </section>
+
+  <section class="section" id="how">
+    <h2 class="section-title">How it works</h2>
+    <div class="pipeline">
+      <article class="pipe-card"><span class="pipe-n">1</span><h3>Tell the story</h3><p>Type a line, speak it, paste your own story or upload your narration.</p></article>
+      <article class="pipe-card"><span class="pipe-n">2</span><h3>Story &amp; cast</h3><p>The writer builds the plot, the shots and the characters, each with a look and a voice.</p></article>
+      <article class="pipe-card"><span class="pipe-n">3</span><h3>Pictures &amp; voices</h3><p>Every shot is painted with the same faces; every line is recorded.</p></article>
+      <article class="pipe-card"><span class="pipe-n">4</span><h3>Motion &amp; lip-sync</h3><p>A free GPU animates each shot and syncs the speakers' lips. A 5-minute film takes about 1½ hours.</p></article>
+      <article class="pipe-card"><span class="pipe-n">5</span><h3>Edit, then post</h3><p>Fix any shot, cut a Short, translate, then download the MP4 and post.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Made for</h2>
+    <div class="use-grid">
+      <article class="use"><b>📺 Story channels</b><span>Long Hindi dramas and moral stories, every week</span></article>
+      <article class="use"><b>📱 Shorts &amp; Reels</b><span>Vertical comedy and cute sketches with talking characters</span></article>
+      <article class="use"><b>🧒 Kids' stories</b><span>Fables and bedtime tales with a gentle narrator</span></article>
+      <article class="use"><b>🪔 Devotional katha</b><span>Mythology and festival stories, told with reverence</span></article>
+      <article class="use"><b>🎓 Education</b><span>History and science lessons as short films</span></article>
+      <article class="use"><b>💼 Business</b><span>Product stories and explainers in local languages</span></article>
+    </div>
+  </section>
+
+  <section class="section langs">
+    <h2 class="section-title">Speaks your language</h2>
+    <ul class="lang-chips">
+      <li>English</li><li>हिन्दी</li><li>भोजपुरी</li><li>বাংলা</li><li>मराठी</li><li>తెలుగు</li><li>ಕನ್ನಡ</li><li>ગુજરાતી</li><li>मैथिली</li><li>मगही</li><li>छत्तीसगढ़ी</li><li>தமிழ்</li><li>മലയാളം</li>
+    </ul>
+  </section>
+
+  <section class="section" id="faq">
+    <h2 class="section-title">Questions</h2>
+    <div class="faq">
+      <details><summary>Is it really free?</summary><p>Yes. Every model is open source and runs on free services and a free GPU. There's no watermark and no paid plan. Because the GPU is shared, there's a daily limit on films with AI motion per person.</p></details>
+      <details><summary>How long does a film take?</summary><p>The story, pictures and voices are ready in about 10 minutes. AI motion and lip-sync take about 1½ hours for a 5-minute film on the free GPU. Keep the tab open; you can watch shots arrive as they're made.</p></details>
+      <details><summary>Can I monetise the videos?</summary><p>The story, pictures, voices and music are generated for your film, and a licence report lists every source. Platforms ask you to label AI content, and the upload description includes that label. VoiceFrame can't guarantee copyright clearance, so review your film before publishing.</p></details>
+      <details><summary>Which languages are supported?</summary><p>126 languages for the story, the voices and the captions: English, 18 Indian languages (Hindi, Bhojpuri, Bengali, Marathi, Telugu, Kannada, Gujarati, Maithili, Magahi, Chhattisgarhi, Tamil, Malayalam, Punjabi, Odia, Assamese, Urdu, Konkani and Sindhi), and world languages from Arabic, Spanish and French to Swahili and Japanese. Right-to-left scripts such as Arabic and Urdu get right-to-left captions. A few languages have no native free voice yet and are read with a close language's pronunciation.</p></details>
+      <details><summary>Can I fix a shot I don't like?</summary><p>Yes. In the storyboard, pick the shots and repaint, re-animate or re-sync just those. You can also edit a line, reorder shots or use your own photo or clip.</p></details>
+      <details><summary>Do I need to install anything?</summary><p>No. It runs in Chrome or Edge on a computer or phone. You can also install it as an app from the browser menu.</p></details>
+      <details><summary>Where are my films stored?</summary><p>On your own device, in the browser. Download the MP4 to keep a copy elsewhere.</p></details>
     </div>
   </section>
 
   <section class="section cta-band">
-    <h2>Your next story is one sentence away.</h2>
+    <h2>Your next film is one sentence away.</h2>
     <button class="btn btn-primary btn-lg" data-go="studio">Open the studio</button>
   </section>
   <footer class="footer">
     <span>© <span id="year"></span> VoiceFrame Studio</span>
-    <span class="muted">Story &amp; images: Pollinations.ai · Voice: Kokoro-82M · Stock: Openverse (CC0/PDM)</span>
+    <span class="muted">Open-source models: Llama, Gemma &amp; GPT-OSS writers · FLUX &amp; SDXL pictures · Wan 2.2 motion · LatentSync lip-sync · Real-ESRGAN upscale · Kokoro &amp; Indic voices · Whisper transcription</span>
   </footer>
 </section>
 
@@ -136,10 +219,114 @@
   <div class="page">
     <div class="page-head">
       <h2>My films</h2>
-      <button class="btn btn-primary" id="btnNewProject">+ New film</button>
+      <div class="head-actions"><button class="btn btn-ghost" data-go="designer">🧑‍🎨 Character designer</button><button class="btn btn-ghost" data-go="chars">📚 Characters</button><button class="btn btn-primary" id="btnNewProject">+ New film</button></div>
     </div>
     <div class="projects-grid" id="projectsGrid"></div>
     <p class="muted empty" id="projectsEmpty" hidden>No films yet. Your first one is a sentence away.</p>
+  </div>
+</section>
+
+
+<!-- ============ CHARACTER EDITOR (a film's character, or the stand-alone designer) ============ -->
+<section id="view-chared" class="view chared" hidden>
+  <header class="ce-top">
+    <button class="icon-btn" id="ceBack" aria-label="Back">←</button>
+    <div class="ce-titles"><b id="ceTitle">Untitled character</b><span class="tiny muted" id="ceWhere"></span></div>
+    <div class="ce-top-right">
+      <button class="icon-btn" id="ceFav" title="Favourite this version" aria-label="Favourite this version">♡</button>
+      <button class="icon-btn" id="ceDel" title="Delete this version" aria-label="Delete this version">🗑</button>
+      <button class="btn btn-ghost btn-sm" id="ceHist">Hide history</button>
+      <button class="btn btn-ghost btn-sm" id="cePull" hidden title="Use the latest saved version of this character from your directory">⟳ Update from directory</button>
+      <button class="btn btn-ghost btn-sm" id="ceSaveDir">⭐ Save to directory</button>
+      <button class="btn btn-light" id="ceDone">Done</button>
+    </div>
+  </header>
+  <div class="ce-body">
+    <aside class="ce-left">
+      <label class="ce-name"><input id="ceName" maxlength="40" aria-label="Character name"><span aria-hidden="true">✎</span></label>
+      <button type="button" class="ce-voice" id="ceVoice"><span>🎙 Select a voice</span><small id="ceVoiceName"></small></button>
+      <div class="ce-req">
+        <label class="field"><span>Gender</span><select id="ceGender"><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other / unspecified</option></select></label>
+        <label class="field"><span>Age</span><input id="ceAgeYears" type="number" min="1" max="100" placeholder="years"></label>
+      </div>
+      <div class="chips ce-ages" id="ceAgePresets"></div>
+      <p class="tiny ce-minor" id="ceMinorNote" hidden>Under 18: only ordinary, age-appropriate everyday, school, festive and traditional clothes are offered and painted.</p>
+      <button type="button" class="ce-outfit" id="ceOutfit"><span>👗 Outfit</span><small id="ceOutfitName"></small></button>
+      <label class="field ce-info"><span>Character info</span><textarea id="ceInfo" rows="6" maxlength="1200" placeholder="Describe how your character looks and acts…"></textarea></label>
+      <p class="tiny muted">The story writer, the casting director and the AI Director read this to write and direct scenes with your character.</p>
+      <details class="ce-more"><summary>More details (for the directory and the prompts)</summary>
+        <label class="field"><span>Role</span><select id="ceRole"><option>protagonist</option><option>ally</option><option>antagonist</option><option>mentor</option><option>other</option></select></label>
+        <label class="field"><span>Era</span><input id="ceEra" maxlength="40" placeholder="e.g. modern, 1950s, Mughal era"></label>
+        <label class="field"><span>Setting</span><input id="ceSetting" maxlength="80" placeholder="e.g. a Kerala fishing village"></label>
+        <label class="field"><span>Language</span><select id="ceLang"></select></label>
+        <label class="field"><span>Casting brief (look, in English)</span><textarea id="ceLook" rows="3" maxlength="400"></textarea></label>
+      </details>
+      <div class="ce-start" id="ceStart">
+        <div class="ce-tabs" role="tablist" aria-label="Ways to design this character">
+          <button type="button" role="tab" data-tab="words" aria-selected="true" class="on">✨ Describe</button>
+          <button type="button" role="tab" data-tab="tools" aria-selected="false">🤖 AI tools</button>
+          <button type="button" role="tab" data-tab="search" aria-selected="false">🔎 Search</button>
+        </div>
+        <div class="ce-pane" data-pane="words" role="tabpanel">
+          <label class="field"><span>Start from words</span><textarea id="ceDescribe" rows="3" maxlength="800" placeholder="e.g. a cheerful 22-year-old college student from Pune who loves street food and photography"></textarea></label>
+          <button type="button" class="btn btn-primary" id="ceDesign">✨ Design this character</button>
+          <p class="tiny muted">AI writer: open-source (gpt-oss) writes the casting brief; the free FLUX painter paints a photo-real person who does not exist.</p>
+          <div class="row"><label class="btn btn-ghost btn-sm">⬆ Upload character<input type="file" id="ceUpload" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" hidden></label></div>
+        </div>
+        <div class="ce-pane" data-pane="tools" role="tabpanel" hidden>
+          <p class="tiny muted">Design this character with a free AI tool and your own account there: VoiceFrame writes the prompt from the gender, age, outfit and look above, you make the picture there, then upload it back. VoiceFrame never signs in to or controls these sites.</p>
+          <div class="ce-tools" id="ceTools"></div>
+          <form class="ce-other" id="ceOtherTool"><input id="ceOtherUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Another tool's address, e.g. https://…" aria-label="Another AI tool's address" maxlength="200"><button class="btn btn-ghost btn-sm">Use</button></form>
+        </div>
+        <div class="ce-pane" data-pane="search" role="tabpanel" hidden>
+          <input id="ceSearch" type="search" placeholder="Search your characters: name, age, outfit, look, place…" aria-label="Search your characters" maxlength="80">
+          <div class="ce-found" id="ceFound"></div>
+          <p class="tiny muted">Searches your character directory. Start from one to make a new character with the same look, outfit and voice.</p>
+        </div>
+      </div>
+    </aside>
+    <main class="ce-center">
+      <div class="ce-stage" id="ceStage"><img id="ceImg" alt="" hidden><div class="ce-empty" id="ceEmpty"></div></div>
+      <div class="ce-toggle" id="ceToggle"><button type="button" data-view="portrait" class="on">🙂 Portrait</button><button type="button" data-view="sheet">🧍 Full body</button></div>
+      <form class="ce-change" id="ceChange">
+        <textarea id="ceAsk" rows="2" maxlength="300" placeholder="What do you want to change?"></textarea>
+        <div class="ce-change-row">
+          <label class="icon-btn" title="Upload a picture as a new version">＋<input type="file" id="ceUpload2" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" hidden></label>
+          <select id="ceFormat" title="Format"><option value="sheet">▭ Sheet 4:3</option><option value="square">◻ Square</option><option value="portrait">▯ Portrait 3:4</option><option value="wide">▬ Wide 16:9</option></select>
+          <select id="cePainter" title="Free painter"><option value="">✨ Auto (FLUX.2, sees the picture)</option><option value="cloudflare-refs">FLUX.2 klein · sees the picture</option><option value="nvidia">FLUX.1 schnell · from words only</option><option value="cloudflare">FLUX.1 · from words only</option><option value="pollinations">Pollinations FLUX · from words only</option></select>
+          <button class="ce-go" aria-label="Paint the change">→</button>
+        </div>
+      </form>
+      <p class="tiny muted ce-note" id="ceNote"></p>
+      <p class="tiny muted">Free painters share a daily allowance with everyone. Family-safe: full figure and face only, no body close-ups.</p>
+    </main>
+    <aside class="ce-right" id="ceHistory"></aside>
+  </div>
+</section>
+
+<!-- ============ CHARACTER DIRECTORY ============ -->
+<section id="view-chars" class="view" hidden>
+  <div class="page">
+    <div class="page-head">
+      <div><h2>Character directory</h2><p class="muted" id="cdWhere">Your saved characters, on this device: reference sheet, portrait, outfit, voice and info. Cast them in any film.</p></div>
+      <div class="head-actions">
+        <button class="btn btn-primary" id="cdNew">＋ New character</button>
+        <label class="btn btn-ghost">⬆ Upload character<input type="file" id="cdUpload" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" hidden></label>
+        <label class="btn btn-ghost" title="A .vfchar.json file exported from VoiceFrame">⤓ Import<input type="file" id="cdImport" accept=".json,application/json" multiple hidden></label>
+      </div>
+    </div>
+    <div class="cd-folder" id="cdFolder"></div>
+    <p class="cd-pick" id="cdPick" hidden></p>
+    <div class="cd-filters">
+      <input type="search" id="cdSearch" placeholder="Search characters…" aria-label="Search characters">
+      <select id="cdGender" aria-label="Gender"><option value="">Any gender</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select>
+      <select id="cdAge" aria-label="Age"><option value="">Any age</option><option value="child">Child</option><option value="teen">Teen</option><option value="adult">Adult</option><option value="elder">Elder</option></select>
+      <select id="cdRole" aria-label="Role"><option value="">Any role</option><option>protagonist</option><option>ally</option><option>antagonist</option><option>mentor</option><option>other</option></select>
+      <select id="cdEra" aria-label="Era or setting"></select>
+      <select id="cdLang" aria-label="Language"></select>
+    </div>
+    <div class="cd-grid" id="cdGrid"></div>
+    <p class="muted empty" id="cdEmpty" hidden>No characters yet. Press ＋ New character, upload one, or save one from a film's cast (⭐).</p>
   </div>
 </section>
 
@@ -149,43 +336,65 @@
     <aside class="stepper" id="stepper">
       <button data-step="idea" class="active"><i>1</i><span>Idea</span></button>
       <button data-step="story"><i>2</i><span>Story</span></button>
-      <button data-step="characters"><i>3</i><span>Characters</span></button>
-      <button data-step="scenes"><i>4</i><span>Scenes</span></button>
-      <button data-step="sound"><i>5</i><span>Voice &amp; music</span></button>
-      <button data-step="film"><i>6</i><span>Film &amp; share</span></button>
+      <button data-step="characters"><i>3</i><span>Cast</span></button>
+      <button data-step="scenes"><i>4</i><span>Storyboard</span></button>
+      <button data-step="sound"><i>5</i><span>Voice &amp; look</span></button>
+      <button data-step="film"><i>6</i><span>Film &amp; tools</span></button>
+      <button class="step-new" id="btnStepNew" title="Start a new film (this one stays in My films)"><i>＋</i><span>New film</span></button>
     </aside>
 
     <div class="studio-main">
+      <header class="workspace-bar" aria-label="Project workspace">
+        <div class="workspace-heading"><small>VOICEFRAME / FILM WORKSPACE</small><strong id="workspaceProjectName">Untitled project</strong></div>
+        <div class="workspace-state"><span class="workspace-pill" id="workspaceMode">Full AI motion</span><span class="workspace-pill" id="workspaceFootage">0 shots</span><span class="workspace-pill" id="workspaceGpu">GPU status</span><button class="btn btn-ghost btn-sm" type="button" data-next="film">Preview &amp; export ↗</button></div>
+      </header>
       <div class="statusbar" id="statusbar" hidden>
         <div class="spinner"></div>
         <div class="status-text"><b id="statusTitle">Working…</b><span id="statusDetail"></span></div>
         <div class="status-progress"><div id="statusBar"></div></div>
+        <button class="btn btn-ghost btn-sm" id="btnSkipGpu" hidden title="Stop waiting for the GPU: shots without AI motion get live faces">Finish now</button>
         <button class="btn btn-ghost btn-sm" id="btnCancel">Cancel</button>
       </div>
 
       <!-- STEP 1: IDEA -->
       <div class="panel" data-panel="idea">
-        <h2>What's your story about?</h2>
-        <p class="muted">Speak or type a line or two. You can also paste a whole story you wrote.</p>
-        <div class="idea-box">
-          <textarea id="ideaInput" rows="5" maxlength="8000" placeholder="e.g. A lonely lighthouse keeper in Kerala finds a glowing fish that can grant one wish, but every wish costs a memory…"></textarea>
-          <div class="idea-tools">
-            <button class="mic-btn" id="btnMic" title="Speak your idea" aria-label="Speak your idea">
-              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1A7 7 0 0 0 19 12h-2Z"/></svg>
-              <span class="mic-ring"></span>
-            </button>
-            <div class="mic-info">
-              <b id="micState">Tap the mic and speak</b>
-              <span class="tiny muted">Voice commands: “create film”, “write story”, “clear”, “stop listening”</span>
+        <div class="tabs small" role="tablist">
+          <button class="tab active" data-source="idea">✍️ From an idea</button>
+          <button class="tab" data-source="audio">🎧 From my audio</button>
+        </div>
+        <div data-sourcepanel="idea">
+          <h2>What's your story about?</h2>
+          <p class="muted">Speak or type a line or two, paste a whole story, or start from a template.</p>
+          <div class="idea-box">
+            <textarea id="ideaInput" rows="5" maxlength="8000" placeholder="e.g. A lonely lighthouse keeper in Kerala finds a glowing fish that can grant one wish, but every wish costs a memory…"></textarea>
+            <div class="idea-tools">
+              <button class="mic-btn" id="btnMic" title="Speak your idea" aria-label="Speak your idea">
+                <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1A7 7 0 0 0 19 12h-2Z"/></svg>
+                <span class="mic-ring"></span>
+              </button>
+              <div class="mic-info">
+                <b id="micState">Tap the mic and speak</b>
+                <span class="tiny muted">Voice commands: “create film”, “write story”, “clear”, “stop listening”</span>
+              </div>
+              <select id="micLang" title="Dictation language">
+                <option value="en-IN">English (India)</option>
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="hi-IN">हिन्दी</option>
+              </select>
             </div>
-            <select id="micLang" title="Dictation language">
-              <option value="en-IN">English (India)</option>
-              <option value="en-US">English (US)</option>
-              <option value="en-GB">English (UK)</option>
-              <option value="hi-IN">हिन्दी</option>
-            </select>
+            <div class="chips" id="tplChips"></div>
           </div>
-          <div class="chips" id="ideaChips"></div>
+          <label class="check"><input type="checkbox" id="optUseOwn"> <span>Use my text as the story (adapt it into shots without rewriting the plot)</span></label>
+        </div>
+        <div data-sourcepanel="audio" hidden>
+          <h2>Make a film from your audio</h2>
+          <p class="muted">Upload a narration, a story you recorded or a podcast clip (MP3, WAV, M4A or a video file, up to 20 minutes). It's transcribed, split into shots and filmed to your own voice.</p>
+          <label class="drop" id="audioDrop">
+            <input type="file" id="audioFile" accept="audio/*,video/*" hidden>
+            <span id="audioName">🎧 Choose an audio file</span>
+          </label>
+          <label class="check"><input type="checkbox" id="optDenoise" checked> <span>Clean up background noise</span></label>
         </div>
 
         <div class="options-grid">
@@ -195,17 +404,18 @@
             </select></label>
           <label class="field"><span>Length</span>
             <select id="optLength">
-              <option value="shorts">YouTube Short · 15–20 s · 5 quick shots, 9:16</option>
-              <option value="short">Short · ~1 min · 6 scenes</option>
-              <option value="medium" selected>Medium · ~2–3 min · 10 scenes</option>
-              <option value="long">Long · ~4–5 min · 16 scenes</option>
-              <option value="film5">Full film · ~5–6 min · 32 scenes</option>
-              <option value="film10">Full film · ~10–11 min · 64 scenes</option>
+              <option value="shorts">YouTube Short · 15–20 s · 9:16</option>
+              <option value="short">Short · ~1 min</option>
+              <option value="medium" selected>Medium · ~2–3 min</option>
+              <option value="long">Long · ~4–5 min</option>
+              <option value="film5">Full film · ~5–6 min</option>
+              <option value="film10">Full film · ~10–11 min</option>
+              <option value="film15">Full film · ~15 min</option>
             </select></label>
           <label class="field"><span>Visual style</span>
             <select id="optStyle">
-              <option value="cinematic">Cinematic live-action</option>
-              <option value="pixar">3D animated film</option>
+              <option value="cinematic">Real live-action (looks filmed)</option>
+              <option value="pixar">3D animated film (cartoon look)</option>
               <option value="anime">Anime</option>
               <option value="painterly">Painterly / concept art</option>
               <option value="watercolor">Watercolour storybook</option>
@@ -215,33 +425,35 @@
           <label class="field"><span>Format</span>
             <select id="optFormat">
               <option value="16:9">16:9 · YouTube</option>
-              <option value="9:16">9:16 · Shorts / Reels / TikTok</option>
+              <option value="9:16">9:16 · Shorts / Reels</option>
               <option value="1:1">1:1 · Instagram feed</option>
             </select></label>
-          <label class="field"><span>Story language</span>
+          <label class="field"><span>Language</span>
             <select id="optLang">
-              <option value="English">English</option>
-              <option value="Hindi">Hindi (needs Pollinations key for voice)</option>
-            </select></label>
-          <label class="field"><span>Scene motion</span>
-            <select id="optMotion">
-              <option value="ai">Imported motion clips · free local rendering</option>
-              <option value="3d">Photo animation · free local rendering (not generated footage)</option>
-            </select></label>
-          <label class="field"><span>Scene visuals</span>
-            <select id="optVisuals">
-              <option value="ai">AI-generated images (service limits apply)</option>
-              <option value="stock">Public-domain photos (instant)</option>
+              <option>English</option><option>Hindi</option><option>Bhojpuri</option><option>Bengali</option><option>Marathi</option><option>Telugu</option><option>Kannada</option><option>Gujarati</option><option>Maithili</option><option>Magahi</option><option>Chhattisgarhi</option><option>Tamil</option><option>Malayalam</option>
             </select></label>
         </div>
-        <p class="tiny muted">Rendering runs on your device and has no video-service quota. Full-motion mode requires imported videos for all scenes. Use Flow assembly to preserve original clip audio and timing. Photo animation is available only when you explicitly select it.</p>
-        <label class="check"><input type="checkbox" id="optUseOwn"> <span>Use my text as the story (adapt it into scenes without rewriting the plot)</span></label>
+        <label class="check"><input id="optStock" type="checkbox" checked><span><b>Real footage:</b> scenery shots with no main character (a village at dawn, diyas, a crowd, leaves in the wind) use real free stock video from Pexels or Wikimedia Commons, credited at the end</span></label>
+        <label class="check"><input id="optCheck" type="checkbox" checked><span><b>Cast check:</b> an AI compares every picture with the script and the cast portraits (right people, gender, age, faces, hands, no stray text) and repaints the ones that are wrong</span></label>
+        <div class="gpu-opts" id="gpuMotionRow">
+          <p class="tiny" id="gpuState"></p>
+          <label class="field"><span>Character motion</span>
+            <select id="optMotion">
+              <option value="live">⚡ Basic motion (browser animation): lips, eyes, expressions, small gestures on still pictures. No real walking. Ready in minutes, ₹0</option>
+              <option value="hero">🎬 Realistic motion for key shots (AI video on the free GPU): up to 12 action and speaking shots get real movement (about 25 min); the rest basic motion</option>
+              <option value="full" selected>🎞 Realistic motion for every shot (AI video on the free GPU): real walking, gestures and lip-sync everywhere (about 1½ h for 5 minutes; keep this tab open)</option>
+            </select></label>
+          <label class="check"><input id="optEnhance" type="checkbox" checked><span><b>HD upscale</b> of the motion clips (sharper; slightly bigger downloads)</span></label>
+        </div>
 
+        <div class="lib-row" id="libRow" hidden><span class="tiny muted">⭐ My characters (tap to cast them in this film):</span><div class="chips" id="libChips"></div></div>
+        <p class="tiny muted char-entry"><button class="btn btn-ghost btn-sm" type="button" data-go="designer">🧑‍🎨 Character designer</button> <button class="btn btn-ghost btn-sm" type="button" data-go="chars">📚 Character directory</button> Design a character once (look, outfit, voice, reference sheet) and cast them in any film.</p>
+        <p class="tiny muted">🕺 Controlled motion: in the storyboard, <b>Copy motion</b> on a shot makes its character follow a video of yours (read on your device).</p>
+        <p class="tiny muted">Made your clips elsewhere (e.g. Google Flow)? <label class="btn btn-ghost btn-sm" title="One shot per clip, in file-name order; each clip keeps its own speech, transcribed as subtitles">🎞 Film from my clips<input type="file" id="clipsFile" accept="video/*,.mp4,.webm,.mov" multiple hidden></label></p>
+        <p class="tiny muted">New to realistic motion? <button class="btn btn-ghost btn-sm" id="btnMotionTest" type="button">🧪 Motion test</button> makes 4 short shots on the free GPU (a walk, writing, a Hindi conversation, a hand-over) so you can judge the motion before a long film.</p>
         <div class="actions">
           <button class="btn btn-primary btn-lg" id="btnAuto">🎬 Create full film automatically</button>
-          <button class="btn btn-ghost btn-lg" id="btnFlowPlan">↗ Prepare story for Flow</button>
           <button class="btn btn-ghost btn-lg" id="btnStoryOnly">Write the story first, then review each step</button>
-          <button class="btn btn-ghost btn-lg" id="btnGptStory">🤖 Write with my ChatGPT</button>
         </div>
         <p class="tiny muted" id="speedNote"></p>
       </div>
@@ -256,53 +468,66 @@
           </div>
           <div class="head-actions">
             <button class="btn btn-ghost" id="btnRewrite">↻ Rewrite</button>
-            <button class="btn btn-primary" data-next="characters">Characters →</button>
+            <button class="btn btn-primary" data-next="characters">Cast →</button>
           </div>
         </div>
         <div class="copyright-flag" id="storyFlag" hidden></div>
         <label class="field"><span>Full story (editable)</span>
           <textarea id="storyText" rows="16" class="story-text"></textarea></label>
-        <p class="tiny muted">Editing the full story doesn't change the scenes. Use “Rewrite” or edit scene narration in step 4.</p>
+        <p class="tiny muted">Editing the full story doesn't change the shots. Edit lines in the storyboard, or use “Rewrite”.</p>
       </div>
 
-      <!-- STEP 3: CHARACTERS -->
+      <!-- STEP 3: CAST -->
       <div class="panel" data-panel="characters" hidden>
         <div class="panel-head">
-          <div><h2>Cast &amp; character design</h2><p class="muted">Each look is reused in every scene so characters stay consistent.</p></div>
+          <div><h2>Cast</h2><p class="muted">Each look is reused in every shot so characters stay the same. Use your own photo for any character.</p></div>
           <div class="head-actions">
+            <button class="btn btn-ghost" id="btnFromDir">📚 Add from directory</button>
+            <button class="btn btn-ghost" data-dialogue>💬 Dialogue</button>
             <button class="btn btn-ghost" id="btnPortraits">🎨 Design portraits</button>
-            <button class="btn btn-primary" data-next="scenes">Scenes →</button>
+            <button class="btn btn-primary" data-next="scenes">Storyboard →</button>
           </div>
         </div>
         <div class="cast-grid" id="castGrid"></div>
       </div>
 
-      <!-- STEP 4: SCENES -->
+      <!-- STEP 4: STORYBOARD -->
       <div class="panel" data-panel="scenes" hidden>
         <div class="panel-head">
-          <div><h2>Storyboard</h2><p class="muted" id="scenesSummary"></p></div>
+          <div><h2>Storyboard</h2><p class="muted" id="scenesSummary"></p><button class="btn btn-ghost btn-sm" id="btnFixFlagged" hidden></button> <button class="btn btn-ghost btn-sm" id="btnCollect" hidden title="The free GPU kept working after the tab closed: fetch its finished clips">⬇ Collect AI clips from the GPU run</button></div>
           <div class="head-actions">
-            <button class="btn btn-ghost" id="btnVisuals">🖼️ Paint all scenes</button>
-            <a class="btn btn-ghost" href="flow.html" data-flow target="_blank" rel="noopener">↗ Flow clips &amp; free assembly</a>
-            <button class="btn btn-ghost" id="btnGptFrames">🤖 Frames from my ChatGPT</button>
-            <button class="btn btn-primary" data-next="sound">Voice &amp; music →</button>
+            <button class="btn btn-ghost" id="btnHandoff" title="Make photo-real clips in a free AI video tool (Google Flow, Kling, Hailuo…) and bring them back">🎬 Make clips elsewhere</button>
+            <button class="btn btn-ghost" data-dialogue>💬 Dialogue</button>
+            <button class="btn btn-ghost" id="btnVisuals">🖼️ Paint missing shots</button>
+            <button class="btn btn-primary" data-next="sound">Voice &amp; look →</button>
           </div>
         </div>
-        <p class="notice tiny muted">Using Google Flow? <a href="flow.html" data-flow target="_blank" rel="noopener">Prepare prompts &amp; assemble Flow clips ↗</a>. Generate and download in Flow, then import clips in the assembly page. This assisted workflow preserves Flow audio; it does not connect an automatic Flow API.</p>
-        <p id="motionStatus" class="copyright-flag" role="status">Write a story before generating motion clips.</p>
+        <div class="fix-bar" id="fixBar" hidden>
+          <b id="fixCount">0 shots selected</b>
+          <button class="btn btn-ghost btn-sm" data-fix="paint" title="New picture, then new motion and lip-sync">🎨 Repaint + animate</button>
+          <button class="btn btn-ghost btn-sm" data-fix="animate" title="New motion from the same picture">🎬 Re-animate</button>
+          <button class="btn btn-ghost btn-sm" data-fix="lip" title="Sync the lips to the current line">👄 Re-sync lips</button>
+          <select class="btn btn-ghost btn-sm" id="fixMagic" title="Give the selected shots a new look and repaint them" aria-label="Magic edit the selected shots"></select>
+          <button class="btn btn-ghost btn-sm" id="fixClear">Clear</button>
+          <span class="tiny muted">Runs on the free GPU; about 10 minutes plus 1 minute a shot.</span>
+        </div>
         <div class="scene-list" id="sceneList"></div>
       </div>
 
-      <!-- STEP 5: SOUND -->
+      <!-- STEP 5: VOICE & LOOK -->
       <div class="panel" data-panel="sound" hidden>
         <div class="panel-head">
-          <div><h2>Voice, music &amp; look</h2><p class="muted">In fast mode the voice is recorded in the cloud in seconds. Otherwise it runs on your device (the first time it downloads about 90 MB, which is then cached).</p></div>
+          <div><h2>Voice, music &amp; look</h2><p class="muted" id="soundNote"></p></div>
           <div class="head-actions">
+            <button class="btn btn-ghost" data-dialogue title="Every spoken line: speaker, words, delivery">💬 Dialogue</button>
+            <button class="btn btn-ghost" id="btnMyVoice" title="Your own voice (with consent) for the narrator or characters, in studio voices">🎙 My voice</button>
+            <button class="btn btn-ghost" id="btnStudioVoices" title="Natural, acted voices for every line, made on the free GPU (a few minutes); the on-device voices stay meanwhile">🎭 Studio voices</button>
+            <button class="btn btn-ghost btn-sm" id="btnStudioOff" title="Use the on-device voices again">↺</button>
             <button class="btn btn-primary" id="btnBuildSound">🎙️ Record voice &amp; score →</button>
           </div>
         </div>
         <div class="options-grid">
-          <label class="field"><span>Narrator voice</span><select id="optNarrator"></select></label>
+          <label class="field"><span>Narrator voice <button type="button" class="btn btn-ghost btn-sm" id="btnNarratorPick">🎙 Select a voice</button></span><select id="optNarrator"></select></label>
           <label class="field"><span>Speaking speed</span>
             <select id="optSpeed"><option value="0.9">Slow &amp; dramatic</option><option value="1" selected>Natural</option><option value="1.1">Brisk</option></select></label>
           <label class="field"><span>Soundtrack mood</span>
@@ -310,21 +535,22 @@
               <option value="auto">Auto (from story)</option><option value="epic">Epic</option><option value="adventure">Adventure</option><option value="emotional">Emotional</option><option value="mysterious">Mysterious</option><option value="dark">Dark / suspense</option><option value="romantic">Romantic</option><option value="joyful">Joyful</option><option value="scifi">Sci-fi</option>
             </select></label>
           <label class="field"><span>Music volume</span><input type="range" id="optMusicVol" min="0" max="100" value="55"></label>
-          <label class="field"><span>Captions</span>
-            <select id="optCaptions"><option value="karaoke">Word-by-word highlight</option><option value="classic">Classic subtitles</option><option value="none">No captions</option></select></label>
+          <label class="field"><span>Caption style</span>
+            <select id="optCaptions"><option value="karaoke">Word-by-word highlight</option><option value="bold">Bold yellow (Shorts style)</option><option value="box">Subtitle box</option><option value="classic">Classic subtitles</option><option value="none">No captions</option></select></label>
           <label class="field"><span>Character dialogue</span>
             <select id="optDialogue"><option value="voiced">Voiced by each character</option><option value="narrator">Read by narrator</option><option value="off">Skip dialogue</option></select></label>
         </div>
         <div class="toggles">
-          <label class="check"><input type="checkbox" id="optDepth" checked> <span>3D camera motion (depth parallax)</span></label>
+          <label class="check"><input type="checkbox" id="optDepth" checked> <span>3D camera on still shots</span></label>
+          <label class="check"><input type="checkbox" id="optFaces" checked> <span>Live characters on still shots: lips move with the voice, eyes blink, heads turn, hands gesture as they speak, arms and legs follow the script (walk, wave, point, dance), hair and clothes move. Made on your device, no GPU wait</span></label>
           <label class="check"><input type="checkbox" id="optBars" checked> <span>Cinematic letterbox bars</span></label>
           <label class="check"><input type="checkbox" id="optGrain" checked> <span>Film grain &amp; colour grade</span></label>
-          <label class="check"><input type="checkbox" id="optSfx" checked> <span>Ambient sound effects (rain, wind, ocean…)</span></label>
+          <label class="check"><input type="checkbox" id="optSfx" checked> <span>Ambient sound (rain, wind, city…)</span></label>
           <label class="check"><input type="checkbox" id="optWatermark"> <span>Small “Made with VoiceFrame” tag</span></label>
         </div>
         <div class="brand-box">
           <h3>Your channel branding</h3>
-          <p class="tiny muted">Shown on every film: your logo and channel name in the corner, plus a Subscribe pop-up. Saved for all your future films.</p>
+          <p class="tiny muted">Your logo and channel name in the corner of every film, plus a Subscribe pop-up. Saved for all your films.</p>
           <div class="brand-row">
             <label class="brand-logo" title="Upload logo">
               <img id="brandLogoImg" alt="" hidden>
@@ -334,7 +560,6 @@
             <div class="brand-fields">
               <label class="field"><span>Channel name</span><input id="brandName" maxlength="40" placeholder="e.g. Akhilesh Stories"></label>
               <div class="brand-actions">
-                <label class="btn btn-ghost btn-sm">⬆ Upload logo<input type="file" id="brandLogo2" accept="image/*" hidden></label>
                 <button class="btn btn-ghost btn-sm" id="brandRemove" type="button">Remove logo</button>
                 <label class="check"><input type="checkbox" id="brandSub" checked> <span>Subscribe pop-up</span></label>
               </div>
@@ -347,20 +572,26 @@
         </div>
       </div>
 
-      <!-- STEP 6: FILM -->
+      <!-- STEP 6: FILM & TOOLS -->
       <div class="panel" data-panel="film" hidden>
         <div class="panel-head">
           <div><h2 id="filmTitle">Your film</h2><p class="muted" id="filmMeta"></p></div>
           <div class="head-actions">
+            <button class="btn btn-ghost" id="btnCreateNewTop">＋ New film</button>
             <button class="btn btn-primary" id="btnRender">⬇ Render MP4</button>
           </div>
         </div>
-        <div id="renderBlocked" class="copyright-flag" role="status" hidden>
-          <p id="renderBlockedText"></p>
-          <div class="actions"><button class="btn btn-primary" data-next="scenes">＋ Import clips in Scenes</button><a href="flow.html" data-flow class="btn btn-ghost" target="_blank" rel="noopener">↗ Assemble Flow clips with original audio</a></div>
+        <div class="quality-block" id="fullMotionBlock" role="status" hidden>
+          <strong>Full-motion footage is still being prepared</strong><p id="fullMotionBlockText"></p>
+          <div class="actions"><button class="btn btn-ghost btn-sm" type="button" data-next="scenes">Open unfinished shots</button><button class="btn btn-ghost btn-sm" type="button" id="btnUseBasic">Use basic animation instead</button></div>
         </div>
         <div class="film-layout">
           <div class="player">
+            <div class="missing-box" id="missingBox" hidden role="alert">
+              <p id="missingText"></p>
+              <button class="btn btn-primary btn-sm" id="btnMissingRetry">↻ Try again</button>
+              <button class="btn btn-ghost btn-sm" id="btnMissingBoard">Open the storyboard</button>
+            </div>
             <div class="player-stage" id="playerStage"><canvas id="playerCanvas"></canvas>
               <button class="big-play" id="btnBigPlay" aria-label="Play">▶</button>
             </div>
@@ -369,27 +600,50 @@
               <input type="range" id="seek" min="0" max="1000" value="0">
               <span class="tc" id="timecode">0:00 / 0:00</span>
             </div>
+            <div class="tl-strip" id="tlStrip" aria-label="Shots on the timeline"></div>
             <div class="render-box" id="renderBox" hidden>
               <div class="render-progress"><div id="renderBar"></div></div>
               <p class="tiny" id="renderText"></p>
             </div>
             <div class="download-box" id="downloadBox" hidden>
+              <p class="stale-note" id="staleNote" hidden>⚠ This MP4 is from before your latest edits. A new version is rendered automatically; you can still watch or download this one.</p>
+              <video class="last-video" id="lastVideo" controls playsinline preload="metadata" hidden></video>
               <a class="btn btn-primary" id="dlVideo" download>⬇ Download video</a>
               <button class="btn btn-ghost" id="dlCredits">📄 Licence report</button>
               <button class="btn btn-ghost" id="dlThumb">🖼️ Thumbnail</button>
               <button class="btn btn-ghost" id="dlSrt">💬 Subtitles (.srt)</button>
+              <button class="btn btn-ghost" id="btnCreateNew">＋ New film</button>
             </div>
           </div>
           <div class="film-side">
-            <div class="card">
-              <h3>Share &amp; upload</h3>
-              <p class="tiny muted">Each button downloads the video if needed, copies your title, description and hashtags, and opens that platform's upload page. Drop the file in and paste.</p>
-              <div class="share-grid" id="shareGrid"></div>
-              <button class="btn btn-ghost btn-block" id="btnNativeShare" hidden>📱 Share file to an app…</button>
+            <div class="card tools-card">
+              <h3>AI tools</h3>
+              <div class="tool">
+                <div><b>🎬 Make clips elsewhere</b><p class="tiny muted">Prompts for Google Flow, Kling, Hailuo and other free AI video tools; bring the clips back by shot number.</p></div>
+                <button class="btn btn-ghost btn-sm" id="btnHandoff2">Open</button>
+              </div>
+              <div class="tool">
+                <div><b>📦 Export for YouTube Create / any editor</b><p class="tiny muted">The MP4, subtitles, voice and music tracks and every shot's clip, numbered, in one .zip.</p></div>
+                <button class="btn btn-ghost btn-sm" id="btnPack">Export pack</button>
+              </div>
+              <div class="tool">
+                <div><b>📱 Smart Short</b><p class="tiny muted">A 9:16 YouTube Short cut from the film's strongest moment, as a new film.</p></div>
+                <button class="btn btn-ghost btn-sm" id="btnShort">Make a Short</button>
+              </div>
+              <div class="tool">
+                <div><b>🌐 Translate the film</b><p class="tiny muted">New voices in another language, lips re-synced on the GPU, as a new film.</p></div>
+                <div class="row"><select id="trLang"></select><button class="btn btn-ghost btn-sm" id="btnTranslate">Translate</button></div>
+              </div>
+              <div class="tool">
+                <div><b>📐 Resize</b><p class="tiny muted">The same film for another screen: YouTube, Shorts and Reels, or a square post. Made as a new film.</p></div>
+                <div class="row"><select id="rsFormat"><option value="16:9">16:9 YouTube</option><option value="9:16">9:16 Shorts / Reels</option><option value="1:1">1:1 Square</option></select><button class="btn btn-ghost btn-sm" id="btnResize">Resize</button></div>
+              </div>
             </div>
             <div class="card">
-              <h3>Copyright check</h3>
-              <ul class="cr-list" id="crList"></ul>
+              <h3>Share &amp; upload</h3>
+              <p class="tiny muted">Each button downloads the video if needed, copies your title, description and hashtags, and opens that platform's upload page.</p>
+              <div class="share-grid" id="shareGrid"></div>
+              <button class="btn btn-ghost btn-block" id="btnNativeShare" hidden>📱 Share file to an app…</button>
             </div>
             <div class="card">
               <h3>Upload details</h3>
@@ -398,59 +652,43 @@
               <label class="field"><span>Hashtags</span><input id="metaTags"></label>
               <button class="btn btn-ghost btn-block" id="btnCopyMeta">Copy all</button>
             </div>
+            <div class="card">
+              <h3>Copyright check</h3>
+              <ul class="cr-list" id="crList"></ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <button class="director-fab" id="btnDirector" title="Edit the film by chatting with the AI Director">🎬 AI Director</button>
+  <aside class="director" id="director" hidden aria-label="AI Director">
+    <header><div><b>🎬 AI Director</b><span class="tiny muted">Tell me what to change, at any step, even after the MP4 is made. I edit the film for you.</span></div><button class="icon-btn" id="dirClose" aria-label="Close">✕</button></header>
+    <div class="dir-log" id="dirLog" aria-live="polite"></div>
+    <div class="dir-chips" id="dirChips"></div>
+    <form class="dir-form" id="dirForm"><textarea id="dirInput" rows="2" maxlength="600" placeholder="e.g. Sepia look for the whole film, a chapter card before shot 2, and slow shot 3 to half speed"></textarea><button class="btn btn-primary btn-sm">Send</button></form>
+  </aside>
 </section>
+
+<dialog id="handoffDialog" class="dialog handoff-dialog">
+  <div class="ho-head"><h2>🎬 Make clips elsewhere</h2><button type="button" class="icon-btn" id="hoClose" aria-label="Close">✕</button></div>
+  <p class="tiny muted">Make photo-real clips of your shots in a free AI video tool on its own website, then bring them back. Each prompt is written for the tool you pick (its clip length, frame shape and prompt limit), with the characters' looks and the spoken line. Save each clip with its shot number (e.g. <b>03.mp4</b>) so it comes back in the right place. Free credits and limits change: check the tool's site.</p>
+  <div class="row ho-row"><label class="field"><span>Tool</span><select id="hoTool"></select></label><a class="btn btn-ghost btn-sm" id="hoOpen" target="_blank" rel="noopener noreferrer">Open the tool ↗</a></div>
+  <p class="tiny muted" id="hoNote"></p>
+  <div class="ho-shots" id="hoShots"></div>
+  <div class="row ho-row"><button type="button" class="btn btn-primary btn-sm" id="hoMake">✍ Write the prompts</button>
+    <label class="btn btn-ghost btn-sm" title="Clips made elsewhere: each replaces the shot with its number (its own speech replaces the recorded voice)">⬆ Bring my clips back<input type="file" id="hoFiles" accept="video/*,.mp4,.webm,.mov" multiple hidden></label>
+    <button type="button" class="btn btn-ghost btn-sm" id="hoPack">📦 Export for YouTube Create / any editor</button></div>
+  <div class="ho-list" id="hoList"></div>
+</dialog>
 
 <dialog id="settingsDialog" class="dialog">
   <form method="dialog">
     <h2>Settings</h2>
-    <label class="field"><span>Story writer</span><select id="setWriter"><option value="shared">Existing shared writer (service limits apply)</option><option value="gemini">Google Gemini 2.5 Flash-Lite (your API key)</option></select></label>
-    <label class="field"><span>Gemini API key (optional; this tab only)</span><input id="setGemini" type="password" autocomplete="off" placeholder="Your Gemini API key"></label>
-    <label class="check"><input id="setGeminiFree" type="checkbox"><span>I have checked that this key belongs to a free-tier API project with no paid billing enabled.</span></label>
-    <p class="tiny muted">Gemini writes stories, cast and scene prompts. Requests go directly to Google. Flow credits are not used. Quota errors stop instead of upgrading or switching to a paid model. The app cannot verify your API project's billing status; check it before adding a key. The key is cleared when this tab's session ends. Without a Gemini key, use the existing shared writer.</p>
-    <label class="field"><span>Pollinations API key (optional)</span>
-      <input id="setKey" type="password" placeholder="sk_…" autocomplete="off"></label>
-    <p class="tiny muted">Without a key, the shared free services are subject to quotas, availability and failures. With your own key from <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">enter.pollinations.ai</a>, scenes paint in parallel, plus Hindi voices and premium narrators. The key stays in this browser only.</p>
-    <label class="field"><span>Voice engine</span>
-      <select id="setEngine"><option value="auto">Cloud voice when available (fast)</option><option value="kokoro">On this device only (slower)</option></select></label>
     <label class="field"><span>Export quality</span>
       <select id="setQuality"><option value="1080">1080p (best)</option><option value="720">720p (faster)</option></select></label>
-    <div class="actions"><button class="btn btn-primary" value="save" id="btnSaveSettings">Save</button><button class="btn btn-ghost" value="cancel">Close</button></div>
+    <div class="actions"><button class="btn btn-primary" value="save">Save</button><button class="btn btn-ghost" value="cancel">Close</button></div>
   </form>
-</dialog>
-
-<dialog id="gptStoryDialog" class="dialog gpt-dialog">
-  <h2>🤖 Write the story with your ChatGPT</h2>
-  <ol class="gpt-steps">
-    <li><b>Copy the prompt</b> (it includes your idea and settings) and open ChatGPT.
-      <div class="actions"><button class="btn btn-primary btn-sm" id="gptCopyStory" type="button">📋 Copy prompt</button>
-      <a class="btn btn-ghost btn-sm" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT ↗</a></div></li>
-    <li><b>Paste it into ChatGPT</b> and send. ChatGPT replies with the story as code (JSON).</li>
-    <li><b>Copy ChatGPT's whole reply</b> (use its copy button) and paste it here:
-      <textarea id="gptStoryPaste" rows="7" placeholder='{"title": "…", "characters": […], "scenes": […]}'></textarea></li>
-  </ol>
-  <p class="form-error" id="gptStoryError"></p>
-  <div class="actions"><button class="btn btn-primary" id="gptLoadStory" type="button">Load story</button>
-    <button class="btn btn-ghost" type="button" onclick="this.closest('dialog').close()">Close</button></div>
-</dialog>
-
-<dialog id="gptFramesDialog" class="dialog gpt-dialog">
-  <h2>🤖 Scene frames from your ChatGPT</h2>
-  <p class="muted tiny">ChatGPT keeps the characters looking the same across a conversation, so every frame matches.</p>
-  <ol class="gpt-steps">
-    <li><b>Copy the image instructions</b> and open ChatGPT (a new chat).
-      <div class="actions"><button class="btn btn-primary btn-sm" id="gptCopyFrames" type="button">📋 Copy image instructions</button>
-      <a class="btn btn-ghost btn-sm" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT ↗</a></div></li>
-    <li><b>Paste and send.</b> ChatGPT draws image 1; type <b>next</b> for each following image. Download each image (in order).</li>
-    <li><b>Upload all the images</b> at once. They go into scenes 1, 2, 3… in the order you downloaded them.
-      <div class="actions"><label class="btn btn-primary btn-sm">⬆ Upload ChatGPT frames<input type="file" id="gptFramesFile" accept="image/*" multiple hidden></label></div></li>
-  </ol>
-  <p class="tiny muted" id="gptFramesNote"></p>
-  <div class="actions"><button class="btn btn-ghost" type="button" onclick="this.closest('dialog').close()">Close</button></div>
 </dialog>
 
 <dialog id="crDialog" class="dialog">
@@ -464,9 +702,132 @@
   </form>
 </dialog>
 
+<dialog id="photoConsentDlg" class="dialog">
+  <h2>📷 Use a real photo for <span id="pcName"></span></h2>
+  <p class="tiny muted">The photo becomes this character's face in new pictures. It stays on your device and goes to the free picture services only to paint this film's shots. Shots with a real person's face move gently, but are never lip-synced, and photos the safety check blocks are not used.</p>
+  <label class="check"><input type="checkbox" id="pcConsent" required> <span><b>This is me, or I have this person's permission.</b></span></label>
+  <p class="tiny muted">Never use a photo of someone without their permission, of a child who isn't yours, or of a public figure.</p>
+  <div class="actions"><button type="button" class="btn btn-primary" id="pcUse" disabled>Use this photo</button><button type="button" class="btn btn-ghost" id="pcCancel">Cancel</button></div>
+</dialog>
+
+<dialog id="myVoiceDlg" class="dialog">
+  <h2>🎙 My voice</h2>
+  <p class="tiny muted">Record 10-30 seconds of natural speech, or upload a recording. Studio voices then speak the parts you choose in this voice, in any of their 23 languages.</p>
+  <div class="row mv-row"><button class="btn" id="mvRec" type="button">● Record</button><label class="btn btn-ghost">⬆ Upload<input type="file" id="mvFile" accept="audio/*" hidden></label> <span id="mvState" class="tiny"></span></div>
+  <audio id="mvPlay" controls hidden></audio>
+  <fieldset id="mvWho" class="mv-who"></fieldset>
+  <label class="check"><input type="checkbox" id="mvConsent" required> <span><b>This is my own voice, or I have the speaker's permission.</b></span></label>
+  <label class="check"><input type="checkbox" id="mvKeep"> <span>Save my voice for other films (kept on this device only)</span></label>
+  <p class="tiny muted">Your sample stays in this project on your device. When studio voices run, it is copied to private GPU storage for that job only and deleted, history included, as soon as the job finishes. You need to be signed in to use it. Never use someone's voice without their permission.</p>
+  <div class="actions"><button class="btn btn-primary" id="mvUse" type="button" disabled>Use my voice</button><button class="btn btn-ghost" id="mvRemove" type="button">Remove</button><button class="btn btn-ghost" id="mvClose" type="button">Close</button></div>
+</dialog>
+
+
+<dialog id="voicePicker" class="dialog vp-dialog" aria-label="Select a voice">
+  <header class="vp-head"><div><h2>Select a voice</h2><span class="tiny muted" id="vpFor"></span></div><button type="button" class="icon-btn" id="vpClose" aria-label="Close">✕</button></header>
+  <div class="vp-body">
+    <div class="vp-left">
+      <input type="search" id="vpSearch" placeholder="Search voices: name, deep, British, soft…" aria-label="Search voices">
+      <div class="vp-chips" id="vpEngine"></div>
+      <div class="vp-chips" id="vpGender"></div>
+      <div class="vp-list" id="vpList" role="listbox" aria-label="Voices"></div>
+    </div>
+    <div class="vp-right">
+      <button type="button" class="vp-preview" id="vpPreview"><span class="vp-play">▶</span><span>Preview</span><small id="vpVoiceName"></small></button>
+      <p class="tiny vp-note" id="vpNote"></p>
+      <label class="vp-box"><span>Sample dialogue <b id="vpCount">0 / 120</b></span><textarea id="vpSample" maxlength="120" rows="3"></textarea></label>
+      <label class="vp-box"><span>Customise performance</span><textarea id="vpPerf" rows="3" maxlength="200" placeholder="Describe the voice performance style… e.g. tired, slow, gentle"></textarea><small id="vpPerfNote"></small></label>
+      <button type="button" class="btn vp-add" id="vpAdd">Add to character</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="outfitPicker" class="dialog op-dialog" aria-label="Outfit">
+  <header class="vp-head"><div><h2>👗 Outfit & wardrobe</h2><span class="tiny muted" id="opFor"></span></div><button type="button" class="icon-btn" id="opClose" aria-label="Close">✕</button></header>
+  <div class="op-body">
+    <div class="op-left">
+      <div class="op-tabs" id="opTabs"></div>
+      <div class="op-filter"><input type="search" id="opSearch" placeholder="Search outfits: saree, satin shirt, uniform…" aria-label="Search outfits"><span class="tiny muted" id="opCount"></span></div>
+      <div class="vp-chips" id="opOcc"></div>
+      <div class="vp-chips" id="opMood"></div>
+      <div class="op-cards" id="opCards"></div>
+    </div>
+    <div class="op-right">
+      <div class="op-wardrobe-head"><b>Wardrobe</b><button type="button" class="btn btn-ghost btn-sm" id="opDelW" title="Remove this outfit from the wardrobe">🗑</button></div>
+      <div class="op-wardrobe" id="opWardrobe"></div>
+      <label class="field"><span>Name in the wardrobe</span><input id="opLabel" maxlength="40" placeholder="e.g. College, Party scene"></label>
+      <p class="tiny"><b>Now:</b> <span id="opNow"></span></p>
+      <div class="op-row"><label class="field"><span>Colour</span><select id="opColour"></select></label><label class="field"><span>Fabric</span><select id="opFabric"></select></label></div>
+      <details class="op-mix"><summary>🧩 Mix & match</summary><div id="opSlots"></div></details>
+      <label class="field"><span>Describe the outfit (your words)</span><textarea id="opText" rows="2" maxlength="200" placeholder="e.g. mustard kurta with mirror work, white palazzos, silver jhumkas"></textarea></label>
+      <p class="tiny op-issue" id="opIssue" role="alert"></p>
+      <label class="field" id="opShotsRow"><span>Wear in shots (e.g. 3, 5-7; empty = main outfit)</span><input id="opShots" placeholder="all other shots"></label>
+      <button type="button" class="btn btn-ghost btn-sm" id="opSuggestBtn">✨ Suggest outfits</button>
+      <div class="op-suggest" id="opSuggest"></div>
+      <button type="button" class="btn btn-primary" id="opDone">Use this outfit</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="gptDlg" class="dialog gpt-dialog" aria-label="Design in an AI tool">
+  <header class="vp-head"><h2 id="gptTitle">💬 Design in ChatGPT (free)</h2><button type="button" class="icon-btn" id="gptClose" aria-label="Close">✕</button></header>
+  <p class="tiny muted"><span id="gptIntro"></span> VoiceFrame never opens your account or controls the site for you. Free picture limits there change often.</p>
+  <ol class="tiny gpt-steps"><li>Copy the prompt.</li><li>Open <span class="gpt-tool">ChatGPT</span> and paste it.</li><li>Download the picture and upload it below.</li></ol>
+  <label class="field"><span>Prompt (you can edit it before copying)</span><textarea id="gptPrompt" rows="9" maxlength="3000" aria-label="Prompt for the AI tool"></textarea></label>
+  <div class="row"><label class="check tiny"><input type="checkbox" id="gptShort"> <span>Short prompt (for tools with a length limit)</span></label><span class="tiny muted" id="gptCount"></span></div>
+  <div class="row"><button type="button" class="btn btn-primary btn-sm" id="gptCopy">📋 Copy prompt</button><a class="btn btn-ghost btn-sm" id="gptOpen" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT ↗</a><span class="tiny" id="gptState"></span></div>
+  <label class="drop gpt-drop" id="gptDrop"><input type="file" id="gptFile" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" hidden><span>⬆ Upload the result (or drop it here)</span></label>
+  <label class="check"><input type="checkbox" id="gptStyle"> <span><b>Use as a style reference:</b> the free FLUX painter paints a new person who does not exist, with this outfit, age and look. That picture counts as generated, so lip-sync is allowed. Without this, the upload is used as it is: a real-looking face, never lip-synced.</span></label>
+  <p class="tiny muted">Every upload is checked: your consent, the safety check on this device and the public-figure check.</p>
+</dialog>
+
+<dialog id="designDlg" class="dialog dz-dialog" aria-label="Character design">
+  <header class="vp-head"><div><h2>🎨 Character design</h2><span class="tiny muted">Write who you want, then choose the AI that designs them.</span></div><button type="button" class="icon-btn" id="dzClose" aria-label="Close">✕</button></header>
+  <label class="field"><span>Your character prompt</span><textarea id="dzPrompt" rows="4" maxlength="800" placeholder="e.g. a cheerful 24-year-old potter from a Rajasthan village, warm smile, clay on her hands, mustard cotton lehenga, silver earrings"></textarea></label>
+  <div class="dz-row">
+    <label class="field"><span>Name</span><input id="dzName" maxlength="40" placeholder="optional"></label>
+    <label class="field"><span>Gender</span><select id="dzGender"><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other / unspecified</option></select></label>
+    <label class="field"><span>Age</span><input id="dzAge" type="number" min="1" max="100" placeholder="years"></label>
+  </div>
+  <p class="dz-label">Design with</p>
+  <div class="dz-tools" id="dzTools"></div>
+  <form class="ce-other" id="dzOther"><input id="dzOtherUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Another AI tool's address, e.g. https://…" aria-label="Another AI tool's address" maxlength="200"><button class="btn btn-ghost btn-sm">Use</button></form>
+  <p class="tiny muted">VoiceFrame AI paints right here (free, open-source). ChatGPT, Muse and the others open in a new tab with your own free account: copy the prompt there, then upload the picture back (consent, safety and public-figure checks). Family-friendly people who don't exist only.</p>
+</dialog>
+
+<dialog id="pickCastDlg" class="dialog pc-dialog" aria-label="Characters for this film">
+  <header class="vp-head"><div><h2>🎭 Characters for this film</h2><span class="tiny muted">Choose saved characters to star in it, or let the AI design the cast from your story.</span></div><button type="button" class="icon-btn" id="pcClose" aria-label="Close">✕</button></header>
+  <div class="pc-grid" id="pcGrid"></div>
+  <p class="tiny muted" id="pcEmpty" hidden>You have no saved characters yet. Let the AI design them from your story, or design one first.</p>
+  <p class="tiny muted">The AI adds any other roles the story needs. Before anything is painted you still check every character's look, outfit, age and voice.</p>
+  <div class="pc-actions">
+    <button type="button" class="btn btn-primary" id="pcUseSelected" disabled>⭐ Use selected (0)</button>
+    <button type="button" class="btn btn-ghost" id="pcAuto">✨ Auto character design</button>
+    <button type="button" class="btn btn-ghost" id="pcDesign">🎨 Design a new character</button>
+  </div>
+</dialog>
+
+<dialog id="castCheckDlg" class="dialog cc-dialog" aria-label="Your cast">
+  <header class="vp-head"><div><h2>🎭 Your cast</h2><span class="tiny muted" id="ccReason"></span></div></header>
+  <p class="tiny muted">The AI picked these. Check each character's gender, age, outfit and voice before anything is painted or voiced. Nothing is painted or voiced while you look; the AI Director can still change all of it later.</p>
+  <div class="cc-film row"><button type="button" class="btn btn-ghost btn-sm" id="ccNarratorBtn">🎙 Narrator: <span id="ccNarrator"></span></button>
+    <label class="field cc-lang"><span>Film language</span><select id="ccLang"></select></label></div>
+  <div class="cc-cards" id="ccCards"></div>
+  <label class="check"><input type="checkbox" id="ccAsk" checked> <span>Always ask me before building</span></label>
+  <div class="actions"><button type="button" class="btn btn-primary" id="ccBuild">✓ Looks good, build the film</button><button type="button" class="btn btn-ghost" id="ccCancel">Stop here</button><a href="#" class="tiny cc-ai" id="ccAI">Let the AI decide</a></div>
+</dialog>
+
+<dialog id="dialogueDlg" class="dialog dl-dialog" aria-label="Dialogue">
+  <header class="vp-head"><div><h2>💬 Dialogue</h2><span class="tiny muted" id="dlLang"></span></div><div class="row"><button type="button" class="btn btn-ghost btn-sm" id="dlMeaning">🌐 Show English meaning</button><button type="button" class="icon-btn" id="dlClose" aria-label="Close">✕</button></div></header>
+  <p class="tiny muted">Every spoken line, shot by shot. Change the speaker, the words or how it's said: only that line is voiced again, and only that shot's lip-sync is marked to redo. <span id="dlState"></span></p>
+  <div class="dl-list" id="dlList"></div>
+</dialog>
+
+<dialog id="cdFilms" class="dialog" aria-label="Add to a film"></dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/config.js?v=25"></script>
-<script type="module" src="js/app.js?v=30"></script>
+<script src="js/config.js?v=30"></script>
+<script type="module" src="js/app.js?v=58"></script>
 </body>
 </html>

@@ -212,6 +212,39 @@ function ambience(ctx, dest, noise, kind, t0, t1, rand) {
     case 'city': bed('lowpass', 350, 0.09); bed('bandpass', 1100, 0.015); break;
     case 'night': bed('lowpass', 400, 0.02); for (let t = t0; t < t1; t += 0.9 + rand() * 0.6) for (let k = 0; k < 3; k++) blip(t + k * 0.06, 4400, 4300, 0.04, 0.012); break;
     case 'cave': bed('lowpass', 250, 0.05); for (let t = t0 + rand() * 2; t < t1; t += 1.5 + rand() * 3) blip(t, 1400, 700, 0.12, 0.03); break;
+    case 'crowd': { const m = bed('bandpass', 450, 0.09, 0.8); swell(m.a.gain, 0.08, 0.03, 2.2); const v = bed('bandpass', 1200, 0.03, 1.5); swell(v.f.frequency, 1200, 400, 1.3); break; }
+    case 'birds': bed('highpass', 2500, 0.008); for (let t = t0 + rand() * 0.5; t < t1; t += 0.35 + rand() * 1.2) { const f = 3200 + rand() * 2400; for (let k = 0; k < 2 + (rand() * 3 | 0); k++) blip(t + k * 0.09, f, f * (0.8 + rand() * 0.6), 0.06, 0.02); } break;
+    case 'temple': bed('lowpass', 180, 0.03); for (let t = t0 + 0.5 + rand(); t < t1 - 1; t += 3 + rand() * 4) bell(t, 620 + rand() * 300, 0.05); break;
+    case 'traffic': bed('lowpass', 300, 0.1); bed('bandpass', 900, 0.02); for (let t = t0 + 1 + rand() * 3; t < t1 - 0.5; t += 4 + rand() * 7) horn(t); break;
+    case 'river': { bed('lowpass', 500, 0.05); const b = bed('bandpass', 1400, 0.04, 2); swell(b.f.frequency, 1400, 600, 0.4); swell(b.a.gain, 0.04, 0.02, 0.5); break; }
+    case 'festival': { const m = bed('bandpass', 500, 0.06, 0.8); swell(m.a.gain, 0.06, 0.025, 2); for (let t = t0 + 0.3; t < t1; t += 0.5) { thump(t, 0.07); if (rand() > 0.4) thump(t + 0.25, 0.035); } break; }
+    case 'kitchen': { const s = bed('highpass', 3200, 0.02); swell(s.a.gain, 0.02, 0.012, 0.3); for (let t = t0 + rand() * 2; t < t1; t += 2 + rand() * 4) blip(t, 3100 + rand() * 900, 3000, 0.25, 0.02, 'triangle'); break; }
+    case 'storm': bed('highpass', 800, 0.045); bed('lowpass', 450, 0.035); for (let t = t0 + 1 + rand() * 3; t < t1 - 1; t += 6 + rand() * 7) thunder(t); break;
+    case 'clock': bed('lowpass', 300, 0.01); for (let t = t0 + 0.2; t < t1; t += 1) blip(t, 2200, 1800, 0.015, 0.03, 'square'); break;
+  }
+  // a temple or school bell: a few inharmonic partials ringing out
+  function bell(t, f, amp) {
+    for (const [mul, a, d] of [[1, 1, 3.5], [2.4, 0.5, 2.2], [3.1, 0.35, 1.6], [4.2, 0.2, 1.1]]) {
+      const o = ctx.createOscillator(), e = ctx.createGain();
+      o.frequency.value = f * mul;
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(amp * a, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0003, t + d);
+      o.connect(e); e.connect(g); o.start(t); o.stop(t + d + 0.05);
+    }
+  }
+  // a car or bus horn: two detuned square tones
+  function horn(t) {
+    const d = 0.25 + rand() * 0.35;
+    for (const f of [420, 520]) blip(t, f, f * 0.98, d, 0.012, 'square');
+  }
+  // a dhol or drum beat: a falling low tone
+  function thump(t, amp) { blip(t, 140, 55, 0.25, amp); }
+  // distant thunder: a low noise burst that swells and rolls away
+  function thunder(t) {
+    const s = ctx.createBufferSource(); s.buffer = noise; s.loop = true;
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 160;
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.16, t + 0.25); e.gain.exponentialRampToValueAtTime(0.001, t + 4);
+    s.connect(f); f.connect(e); e.connect(g); s.start(t, rand() * 2); s.stop(t + 4.1);
   }
 }
 
@@ -219,6 +252,14 @@ function ambience(ctx, dest, noise, kind, t0, t1, rand) {
 // timeline: { total, scenes:[{start,end,ambience}], segments:[{start,buffer}] }
 export async function mixFilm(timeline, { mood, seed, musicVol = 0.55, sfx = true, withVoice = true }) {
   const total = timeline.total;
+  // A film broken into shots (one per line) keeps each scene's sound running across its
+  // shots: ambience, the score's changes and the whoosh into a cut follow the scenes.
+  const places = [];
+  for (const s of timeline.scenes) {
+    const last = places[places.length - 1];
+    if (last && s.sceneOf != null && last.sceneOf === s.sceneOf) last.end = s.end;
+    else places.push({ start: s.start, end: s.end, ambience: s.ambience, sceneOf: s.sceneOf });
+  }
   const ctx = new OfflineAudioContext(2, Math.ceil(total * SR), SR);
   const comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -12; comp.knee.value = 6; comp.ratio.value = 3.5; comp.attack.value = 0.004; comp.release.value = 0.25;
@@ -248,7 +289,7 @@ export async function mixFilm(timeline, { mood, seed, musicVol = 0.55, sfx = tru
   if (total <= LOOP_AFTER) {
     const score = new Score(ctx, mood, seed);
     score.out.connect(music);
-    score.compose(total, timeline.scenes.map(s => s.start));
+    score.compose(total, places.map(s => s.start));
     noise = score.noise;
   } else {
     // Long films: compose ~2 minutes of whole chord cycles once (with its own reverb),
@@ -268,7 +309,7 @@ export async function mixFilm(timeline, { mood, seed, musicVol = 0.55, sfx = tru
     const d = noise.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     // dry whooshes into each cut (no reverb: a full-length convolver is the slow part)
-    timeline.scenes.forEach((s, i) => {
+    places.forEach((s, i) => {
       if (!i) return;
       const t1 = s.start, t0 = Math.max(0, t1 - 1.3), src = ctx.createBufferSource(); src.buffer = noise; src.loop = true;
       const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.2;
@@ -281,14 +322,14 @@ export async function mixFilm(timeline, { mood, seed, musicVol = 0.55, sfx = tru
   if (sfx) {
     const fx = ctx.createGain(); fx.gain.value = 0.9; fx.connect(comp);
     const r = rng((seed || 1) * 31);
-    timeline.scenes.forEach(s => ambience(ctx, fx, noise, s.ambience, s.start, s.end, r));
+    places.forEach(s => ambience(ctx, fx, noise, s.ambience, s.start, s.end, r));
   }
   if (withVoice) {
     const voice = ctx.createGain(); voice.gain.value = 1.15;
     const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 70;
     voice.connect(hp); hp.connect(comp);
     for (const s of timeline.segments) {
-      const src = ctx.createBufferSource(); src.buffer = s.buffer; src.connect(voice); src.start(s.start);
+      const src = ctx.createBufferSource(); src.buffer = s.buffer; src.connect(voice); src.start(s.start, s.offset || 0);
     }
   }
   const out = await ctx.startRendering();

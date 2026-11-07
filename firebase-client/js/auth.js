@@ -37,6 +37,8 @@ export const signUp = (name, email, pw) => impl.signUp(name.trim(), email.trim()
 export const signInGoogle = () => impl.google();
 export const resetPassword = email => impl.reset(email.trim().toLowerCase());
 export const signOut = () => impl.signOut();
+// The signed-in person's ID token, which the relay checks for the daily GPU allowance (null for device accounts).
+export const idToken = async () => (impl?.token ? impl.token() : null);
 
 // ---------------- Firebase ----------------
 async function firebaseImpl(cfg) {
@@ -67,7 +69,8 @@ async function firebaseImpl(cfg) {
     }),
     google: wrap(() => A.signInWithPopup(auth, new A.GoogleAuthProvider())),
     reset: wrap(email => A.sendPasswordResetEmail(auth, email)),
-    signOut: () => A.signOut(auth)
+    signOut: () => A.signOut(auth),
+    token: () => auth.currentUser?.getIdToken() ?? null
   };
 }
 

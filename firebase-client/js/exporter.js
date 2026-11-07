@@ -1,6 +1,6 @@
 // MP4 export. Fast path: WebCodecs (H.264 + AAC/Opus) muxed with mp4-muxer,
 // rendered faster than real time. Fallback: MediaRecorder in real time.
-import { Cancelled } from './ai.js?v=25';
+import { Cancelled } from './ai.js?v=57';
 
 const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm';
 // Background tabs throttle setTimeout to 1/s; a MessageChannel hop is not throttled,
@@ -15,10 +15,20 @@ export async function exportFilm({ renderer, audio, W, H, fps = 30, onProgress, 
   return realtime({ renderer, audio, W, H, fps, onProgress, signal });
 }
 
-// Long films get a lower bitrate so a 10-minute MP4 stays a few hundred MB.
+// YouTube's recommended upload rates (8-12 Mb/s at 1080p): grain, particles and
+// camera moves need the headroom to stay sharp. Films over 5 minutes use the lower
+// end so a 10-minute MP4 stays about 600 MB.
+// Where the encoder supports it, every frame is encoded at a fixed quality
+// (quantizer 18, near-transparent; 20 for films over 5 minutes) instead of a bitrate:
+// hardware encoders were undershooting the bitrate target by more than half.
 async function pickVideo(W, H, fps, seconds = 0) {
+  const qp = seconds > 300 ? 20 : 18;
+  for (const codec of ['avc1.640033', 'avc1.640028']) {
+    const cfg = { codec, width: W, height: H, framerate: fps, bitrateMode: 'quantizer', latencyMode: 'quality', avc: { format: 'avc' } };
+    try { if ((await VideoEncoder.isConfigSupported(cfg)).supported) return { ...cfg, qp }; } catch { /* try bitrate mode */ }
+  }
   const full = W * H >= 1920 * 1080 * 0.9;
-  const bitrate = seconds > 300 ? (full ? 3_500_000 : 2_200_000) : (full ? 5_000_000 : 3_000_000);
+  const bitrate = seconds > 300 ? (full ? 8_000_000 : 5_000_000) : (full ? 12_000_000 : 7_500_000);
   for (const codec of ['avc1.640033', 'avc1.640028', 'avc1.4d0033', 'avc1.42003e', 'avc1.42001f']) {
     const cfg = { codec, width: W, height: H, bitrate, framerate: fps, latencyMode: 'quality', avc: { format: 'avc' } };
     try { if ((await VideoEncoder.isConfigSupported(cfg)).supported) return cfg; } catch { /* try next */ }
@@ -34,20 +44,41 @@ async function pickAudio(sampleRate) {
 }
 
 async function webcodecs({ renderer, audio, W, H, fps, onProgress, signal }) {
-  const { Muxer, ArrayBufferTarget } = await import(MUXER);
+  const { Muxer, ArrayBufferTarget, StreamTarget } = await import(MUXER);
   const vcfg = await pickVideo(W, H, fps, audio.duration);
   const acfg = await pickAudio(audio.sampleRate);
-  const target = new ArrayBufferTarget();
+  // A film over 6 minutes is over a gigabyte: one block of memory that size can fail.
+  // It is written as a fragmented MP4 instead, in order, piece by piece, into a file
+  // the browser can keep on disk (YouTube and players read it the same).
+  const long = audio.duration > 360;
+  const parts = [];
+  let written = 0;
+  const target = long ? new StreamTarget({
+    onData: (data, position) => {
+      if (position !== written) throw new Error('MP4 pieces arrived out of order');
+      parts.push(new Blob([data])); written += data.byteLength;
+    }
+  }) : new ArrayBufferTarget();
   const muxer = new Muxer({
     target,
     video: { codec: 'avc', width: W, height: H, frameRate: fps },
     audio: { codec: acfg.mux, numberOfChannels: 2, sampleRate: audio.sampleRate },
-    fastStart: 'in-memory',
+    fastStart: long ? 'fragmented' : 'in-memory',
+    ...(long ? { minFragmentDuration: 2 } : {}),
     firstTimestampBehavior: 'offset'
   });
   let failure = null;
-  const venc = new VideoEncoder({ output: (c, m) => muxer.addVideoChunk(c, m), error: e => { failure = e; } });
-  venc.configure(vcfg);
+  // Some hardware encoders tag full-range output with the sRGB curve, which players
+  // read inconsistently; label it as standard HD video (BT.709), keeping its range.
+  const tag = m => {
+    const cs = m?.decoderConfig?.colorSpace;
+    if (cs) m.decoderConfig.colorSpace = { primaries: 'bt709', transfer: 'bt709', matrix: 'bt709', fullRange: !!cs.fullRange };
+    return m;
+  };
+  const venc = new VideoEncoder({ output: (c, m) => muxer.addVideoChunk(c, tag(m)), error: e => { failure = e; } });
+  const { qp, ...encCfg } = vcfg;
+  venc.configure(encCfg);
+  const frameOpts = qp ? { avc: { quantizer: qp } } : {};
   const aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: e => { failure = e; } });
   aenc.configure(acfg.cfg);
 
@@ -73,7 +104,7 @@ async function webcodecs({ renderer, audio, W, H, fps, onProgress, signal }) {
     await renderer.prepare?.(f / fps);
     renderer.draw(ctx, f / fps);
     const frame = new VideoFrame(canvas, { timestamp: Math.round(f * 1e6 / fps), duration: Math.round(1e6 / fps) });
-    venc.encode(frame, { keyFrame: f % (fps * 2) === 0 });
+    venc.encode(frame, { keyFrame: f % (fps * 2) === 0, ...frameOpts });
     frame.close();
     while (venc.encodeQueueSize > 6 && !failure) {
       await new Promise(r => { venc.addEventListener('dequeue', r, { once: true }); setTimeout(r, 1000); });
@@ -88,7 +119,7 @@ async function webcodecs({ renderer, audio, W, H, fps, onProgress, signal }) {
   if (failure) throw failure;
   muxer.finalize();
   venc.close(); aenc.close();
-  return new Blob([target.buffer], { type: 'video/mp4' });
+  return new Blob(long ? parts : [target.buffer], { type: 'video/mp4' });
 }
 
 async function realtime({ renderer, audio, W, H, fps, onProgress, signal }) {
