@@ -33,12 +33,17 @@ const simulateFail = () => { try { return localStorage.getItem('vf_safety_test')
 
 function getWorker() {
   if (worker) return worker;
-  worker = new Worker(new URL('./safety-worker.js?v=57', import.meta.url), { type: 'module' });
+  worker = new Worker(new URL('./safety-worker.js?v=63', import.meta.url), { type: 'module' });
   worker.onmessage = e => {
     const p = pending.get(e.data.id);
     if (!p) return;
     pending.delete(e.data.id);
-    e.data.error ? p.reject(new SafetyDown(e.data.error)) : p.resolve(e.data);
+    if (e.data.error) {
+      p.reject(new SafetyDown(e.data.error));
+      // ONNX caches failed backend initialization inside its worker. Retry in a
+      // fresh worker rather than repeatedly reusing that broken runtime.
+      if (p.warm) { worker?.terminate(); worker = null; warmed = null; }
+    } else p.resolve(e.data);
   };
   worker.onerror = e => {
     pending.forEach(p => p.reject(new SafetyDown(e.message || 'worker error')));
@@ -52,7 +57,7 @@ function ask(msg, ms) {
   return new Promise((resolve, reject) => {
     const id = ++seq;
     const timer = setTimeout(() => { pending.delete(id); reject(new SafetyDown('timed out')); }, ms);
-    pending.set(id, { resolve: v => { clearTimeout(timer); resolve(v); }, reject: e => { clearTimeout(timer); reject(e); } });
+    pending.set(id, { warm: !!msg.warm, resolve: v => { clearTimeout(timer); resolve(v); }, reject: e => { clearTimeout(timer); reject(e); } });
     try { getWorker().postMessage({ id, ...msg, fail: simulateFail() }); }
     catch (e) { pending.delete(id); clearTimeout(timer); reject(new SafetyDown(e.message)); }
   });

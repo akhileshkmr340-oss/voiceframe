@@ -1,6 +1,6 @@
 // MP4 export. Fast path: WebCodecs (H.264 + AAC/Opus) muxed with mp4-muxer,
 // rendered faster than real time. Fallback: MediaRecorder in real time.
-import { Cancelled } from './ai.js?v=57';
+import { Cancelled } from './ai.js?v=63';
 
 const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm';
 // Background tabs throttle setTimeout to 1/s; a MessageChannel hop is not throttled,

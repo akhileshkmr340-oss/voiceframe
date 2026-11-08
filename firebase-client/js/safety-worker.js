@@ -3,6 +3,8 @@
 // cached by the browser after the first film). Answers the "nsfw" probability, 0-1.
 // The revision is pinned, so a changed model upstream can't change what is let through.
 import { pipeline, RawImage, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.1/+esm';
+import { configureBrowserModels } from './browser-model-runtime.js?v=63';
+configureBrowserModels(env);
 
 const MODEL = 'AdamCodd/vit-base-nsfw-detector';
 const REVISION = '8587de998f441aac03fdd57a85d2e4cb808c7d64';

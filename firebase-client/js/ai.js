@@ -1,8 +1,8 @@
 // The AI services, all through the site's relay (open models only): writers, painters,
 // voices, transcription and the free GPU jobs; plus Openverse public-domain photos as
 // the last-resort picture.
-import { idToken } from './auth.js?v=52';
-import { checkImage, Unsafe, SafetyDown } from './safety.js?v=57';
+import { idToken } from './auth.js?v=63';
+import { checkImage, warmSafety, Unsafe, SafetyDown } from './safety.js?v=63';
 export { Unsafe, SafetyDown };
 
 export const API = (window.VF_CONFIG?.apiBase || 'api').replace(/\/$/, '');
@@ -182,11 +182,14 @@ export const paintersOut = () => Date.now() < paintersOutUntil;
 // 'cloudflare', 'pollinations' paint from the words alone), as the character editor's picker asks.
 export async function paintImage(prompt, { width, height, seed, onWait, signal, refs, lock = false, painter = '' }) {
   lock = lock && !!refs?.length && !painter;
-  if (paintersOut() && !lock) throw new Error('Every free picture service is out for now');
+  // Fail before spending a provider request if the local checker cannot load.
+  await warmSafety();
+  if (signal?.aborted) throw new Cancelled();
+  if (paintersOut() && !lock && !painter) throw new Error('Free image providers are temporarily unavailable. Your prompt is saved. Try a named provider or retry in a few minutes.');
   const body = JSON.stringify({ prompt: prompt.slice(0, 1800), width, height, seed, ...(refs?.length ? { refs } : {}), ...(lock ? { lock: true } : {}), ...(painter ? { painter } : {}) });
   let last = '';
-  for (let attempt = 0; attempt < 5; attempt++) {
-    await waitGate('image', onWait, signal);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (!painter) await waitGate('image', onWait, signal);
     let r;
     const timeout = AbortSignal.timeout(110000);
     try {
@@ -205,6 +208,9 @@ export async function paintImage(prompt, { width, height, seed, onWait, signal, 
     }
     const blocked = await unsafeOf(r) || await relayRefusal(r);
     if (blocked) throw blocked;
+    if (r.status >= 400 && r.status < 500 && r.status !== 429) {
+      throw Object.assign(new Error(`Image request rejected (${r.status}). Your prompt is kept. Check the request or sign in again; it was not retried.`), { status: r.status });
+    }
     if (lock && r.status === 503) {
       const j = await r.clone().json().catch(() => ({}));
       if (j.castOut) throw Object.assign(new Error('The cast painter is out for today'), { castOut: true });
@@ -212,7 +218,7 @@ export async function paintImage(prompt, { width, height, seed, onWait, signal, 
     // one named painter that is out or busy says so after two tries (the others are not counted as out)
     if (r.status === 503 && painter) { if (attempt >= 1) throw Object.assign(new Error(`That painter is busy or out for today. Try “Auto” or another painter.`), { painterOut: true }); }
     else if (r.status === 503 && !lock && ++busyRun >= 8) paintersOutUntil = Date.now() + 600000;
-    if (paintersOut()) throw new Error('Every free picture service is out for now');
+    if (paintersOut() && !lock && !painter) throw new Error('Free image providers are temporarily unavailable. Your prompt is saved. Try a named provider or retry in a few minutes.');
     last = r.status + ' ' + (await r.text().catch(() => '')).slice(0, 160);
     // every painter busy: all pictures wait together (20, 40, 60 s), not each on its own
     gate.image = Math.max(gate.image, Date.now() + (r.status === 503 || r.status === 429 ? 20000 * (attempt + 1) : 6000));

@@ -1,20 +1,20 @@
-import { compactPrompt } from './character-prompt.js?v=59';
+import { compactPrompt } from './character-prompt.js?v=63';
 // Characters: the voice picker ("Select a voice"), the character editor (one full-screen page
 // for a film's character or a directory character), the character directory (the person's
 // saved characters, on this device) and uploads of their own character pictures.
 // The film's own character page and the stand-alone Character Designer are the same editor:
 // both edit a draft and both save to the same directory.
-import * as Store from './store.js?v=57';
-import { paintImage, checkPicture, chat, parseJSON, Cancelled } from './ai.js?v=57';
-import { checkImage, SAFETY_DOWN } from './safety.js?v=57';
-import { portraitPrompt } from './story.js?v=57';
-import { speak, playBuffer, loadVoice, voiceEngine, narratorsFor } from './voice.js?v=57';
-import { findLanguage, languageOptionsHTML, isRTL } from './langs.js?v=57';
-import { studioEngine, previewStudioVoice, loadMyVoice } from './studio.js?v=57';
-import { voiceList, findVoice, voiceName, performanceSummary, parsePerformance, lineStyle } from './voicebook.js?v=57';
-import { AGE_PRESETS, ageOf, ageClass, personWords, outfitPrompt, outfitLabel, outfitIssue, ensureFields, isMinor, outfitById, allowed } from './outfits.js?v=57';
-import { openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=57';
-import { cloudOn, putCloud, deleteCloud, listCloud, smaller, MAX_CLOUD } from './cloud.js?v=57';
+import * as Store from './store.js?v=63';
+import { paintImage, checkPicture, chat, parseJSON, Cancelled } from './ai.js?v=63';
+import { checkImage, SAFETY_DOWN } from './safety.js?v=63';
+import { portraitPrompt } from './story.js?v=63';
+import { speak, playBuffer, loadVoice, voiceEngine, narratorsFor } from './voice.js?v=63';
+import { findLanguage, languageOptionsHTML, isRTL } from './langs.js?v=63';
+import { studioEngine, previewStudioVoice, loadMyVoice } from './studio.js?v=63';
+import { voiceList, findVoice, voiceName, performanceSummary, parsePerformance, lineStyle } from './voicebook.js?v=63';
+import { AGE_PRESETS, ageOf, ageClass, personWords, outfitPrompt, outfitLabel, outfitIssue, ensureFields, isMinor, outfitById, allowed } from './outfits.js?v=63';
+import { openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=63';
+import { cloudOn, putCloud, deleteCloud, listCloud, smaller, MAX_CLOUD } from './cloud.js?v=63';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

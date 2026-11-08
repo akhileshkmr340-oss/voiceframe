@@ -1,8 +1,8 @@
 // AI Director: a chat agent that edits the film. The free writer reads a compact view of
 // the film and replies with {reply, actions}; app.js checks and carries out the actions.
 // Edits work at any stage, also after the MP4 is made (the film is then rendered again).
-import { chat, parseJSON } from './ai.js?v=57';
-import { outfitPrompt, outfitForShot, outfitLabel, ageOf } from './outfits.js?v=57';
+import { chat, parseJSON } from './ai.js?v=63';
+import { outfitPrompt, outfitForShot, outfitLabel, ageOf } from './outfits.js?v=63';
 
 export const CAMS = ['push-in', 'pull-out', 'pan-left', 'pan-right', 'tilt-up', 'tilt-down', 'track-left', 'track-right', 'orbit', 'handheld', 'drift'];
 export const AMBS = ['none', 'rain', 'storm', 'wind', 'ocean', 'river', 'fire', 'forest', 'birds', 'city', 'traffic', 'crowd', 'festival', 'temple', 'kitchen', 'clock', 'night', 'cave'];
