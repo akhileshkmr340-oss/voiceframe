@@ -2,19 +2,21 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { configureBrowserModels } from '../firebase-client/js/browser-model-runtime.js';
+import { ImageProviderPool } from '../firebase-client/js/image-providers.js';
 const source = readFileSync(new URL('../firebase-client/js/ai.js', import.meta.url), 'utf8');
 const start = source.indexOf('export async function paintImage(');
 const end = source.indexOf('// ---------------- picture check', start);
 function painter(overrides = {}) {
   const calls = { request: 0, check: 0, wait: 0 };
   const deps = {
+    imageProviders: new ImageProviderPool(),
     warmSafety: async () => {}, paintersOut: () => false, Cancelled: class extends Error {},
     waitGate: async () => { calls.wait++; }, FREE_IMG: '/image',
     relayFetch: async () => { calls.request++; return new Response(new Blob(['image']), { headers: { 'content-type': 'image/jpeg' } }); },
     checkImage: async () => { calls.check++; }, unsafeOf: async () => null, relayRefusal: async () => null,
     ...overrides
   };
-  const run = new Function('deps', `const {${Object.keys(deps).join(',')}}=deps; let busyRun=0,paintersOutUntil=0;const gate={image:0};return ${source.slice(start,end).replace('export ','')}`)(deps);
+  const run = new Function('deps', `const {${Object.keys(deps).join(',')}}=deps;return ${source.slice(start,end).replace('export ','')}`)(deps);
   return { run, calls };
 }
 test('browser model setup avoids blob module imports and shared-memory workers while retaining model cache', () => {
@@ -32,8 +34,13 @@ test('a named painter is not blocked by unrelated automatic-provider failures', 
   assert.ok((await run('Fictional adult portrait',{painter:'nvidia'})).size);
   assert.equal(calls.request,1);assert.equal(calls.check,1);assert.equal(calls.wait,0);
 });
-test('automatic mode still respects its cooldown', async () => {
-  const {run,calls}=painter({paintersOut:()=>true});await assert.rejects(run('Portrait',{}),/temporarily unavailable/);assert.equal(calls.request,0);
+test('automatic mode moves to a second image provider after a busy response', async () => {
+  const providers=[];
+  const {run}=painter({relayFetch:async(url,opts)=>{
+    providers.push(JSON.parse(opts.body).painter);
+    return providers.length===1 ? new Response('{}',{status:503}) : new Response(new Blob(['image']),{headers:{'content-type':'image/jpeg'}});
+  }});
+  assert.ok((await run('Portrait',{})).size);assert.deepEqual(providers,['nvidia','cloudflare-refs']);
 });
 test('invalid requests are not repeatedly submitted', async () => {
   let count=0;const {run}=painter({relayFetch:async()=>{count++;return new Response('{}',{status:400});}});

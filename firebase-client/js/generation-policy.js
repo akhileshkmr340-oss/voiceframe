@@ -1,4 +1,4 @@
-import { qualityBlockers } from './clip-quality.js?v=63';
+import { qualityBlockers } from './clip-quality.js?v=65';
 // Full motion requires actual video footage. Hero mode is explicitly a mixed film.
 export const requiresFullFootage = project => project?.options?.motion === 'full';
 export function missingFootage(project) {

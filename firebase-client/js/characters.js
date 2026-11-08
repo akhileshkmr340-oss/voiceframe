@@ -1,20 +1,20 @@
-import { compactPrompt } from './character-prompt.js?v=63';
+import { compactPrompt } from './character-prompt.js?v=65';
 // Characters: the voice picker ("Select a voice"), the character editor (one full-screen page
 // for a film's character or a directory character), the character directory (the person's
 // saved characters, on this device) and uploads of their own character pictures.
 // The film's own character page and the stand-alone Character Designer are the same editor:
 // both edit a draft and both save to the same directory.
-import * as Store from './store.js?v=63';
-import { paintImage, checkPicture, chat, parseJSON, Cancelled } from './ai.js?v=63';
-import { checkImage, SAFETY_DOWN } from './safety.js?v=63';
-import { portraitPrompt } from './story.js?v=63';
-import { speak, playBuffer, loadVoice, voiceEngine, narratorsFor } from './voice.js?v=63';
-import { findLanguage, languageOptionsHTML, isRTL } from './langs.js?v=63';
-import { studioEngine, previewStudioVoice, loadMyVoice } from './studio.js?v=63';
-import { voiceList, findVoice, voiceName, performanceSummary, parsePerformance, lineStyle } from './voicebook.js?v=63';
-import { AGE_PRESETS, ageOf, ageClass, personWords, outfitPrompt, outfitLabel, outfitIssue, ensureFields, isMinor, outfitById, allowed } from './outfits.js?v=63';
-import { openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=63';
-import { cloudOn, putCloud, deleteCloud, listCloud, smaller, MAX_CLOUD } from './cloud.js?v=63';
+import * as Store from './store.js?v=65';
+import { paintImage, checkPicture, chat, parseJSON, Cancelled } from './ai.js?v=65';
+import { checkImage, SAFETY_DOWN } from './safety.js?v=65';
+import { portraitPrompt } from './story.js?v=65';
+import { speak, playBuffer, loadVoice, voiceEngine, narratorsFor } from './voice.js?v=65';
+import { findLanguage, languageOptionsHTML, isRTL } from './langs.js?v=65';
+import { studioEngine, previewStudioVoice, loadMyVoice } from './studio.js?v=65';
+import { voiceList, findVoice, voiceName, performanceSummary, parsePerformance, lineStyle } from './voicebook.js?v=65';
+import { AGE_PRESETS, ageOf, ageClass, personWords, outfitPrompt, outfitLabel, outfitIssue, ensureFields, isMinor, outfitById, allowed } from './outfits.js?v=65';
+import { openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=65';
+import { cloudOn, putCloud, deleteCloud, listCloud, smaller, MAX_CLOUD } from './cloud.js?v=65';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -432,9 +432,10 @@ async function paint(view, change, { painter = '', format = '' } = {}, signal) {
   const useRefs = refs && (!painter || painter === 'cloudflare-refs');
   try {
     return await paintImage(prompt, { width: size[0], height: size[1], seed, signal, refs: useRefs ? refs : undefined, lock: !!useRefs && !painter, painter,
+      onProvider: note => ctx.setStatus('Designing the character…', note),
       onWait: sec => ctx.setStatus('Painting…', `The free painters are busy, retrying in ${sec}s`) });
   } catch (e) {
-    if (e.castOut) throw new Error('The painter that sees the reference picture is out for today (it resets at 05:30 IST). Pick another painter: it paints from the words alone.');
+    if (e.castOut) throw new Error('No reference-aware image provider is available. Your reference and prompt are kept; generation stopped instead of changing the face.');
     throw e;
   }
 }

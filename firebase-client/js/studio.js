@@ -8,10 +8,10 @@
 //   kept in the project on this device; a job copies it to a private Hugging Face dataset,
 //   and the GPU notebook deletes it (history included) when the job ends.
 // - Record my lines: a line the person speaks replaces the generated voice for that line.
-import { API, Cancelled, relayFetch } from './ai.js?v=63';
-import { speak } from './voice.js?v=63';
-import { findLanguage } from './langs.js?v=63';
-import { deliveryParams, parsePerformance, parlerWords, PARLER_VOICES } from './voicebook.js?v=63';
+import { API, Cancelled, relayFetch } from './ai.js?v=65';
+import { speak } from './voice.js?v=65';
+import { findLanguage } from './langs.js?v=65';
+import { deliveryParams, parsePerformance, parlerWords, PARLER_VOICES } from './voicebook.js?v=65';
 
 // Languages each studio model speaks (from their model cards, checked 2026-11-06).
 export const CHATTERBOX = new Set('ar da de el en es fi fr he hi it ja ko ms nl no pl pt ru sv sw tr zh'.split(' '));

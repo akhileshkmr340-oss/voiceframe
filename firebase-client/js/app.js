@@ -1,28 +1,28 @@
-import { runVerifiedStage, storyProblems, audioProblems } from './stage-gate.js?v=63';
-import { waitVideoEvent, seekVideo } from './media-readiness.js?v=63';
-import { inspectClipQuality, qualityBlockers, retryShots, requireSingleSpeaker, motionReference } from './clip-quality.js?v=63';
-import { requiresFullFootage, missingFootage, assertFullFootage, footageSummary } from './generation-policy.js?v=63';
-import * as Auth from './auth.js?v=63';
-import * as Store from './store.js?v=63';
-import { paintImage, checkPicture, stockImage, relayStatus, relayHasMotion, refreshRelayMotion, relayCanPaintCast, paintersOut, API, Cancelled, Unsafe, relayFetch } from './ai.js?v=63';
-import { checkImage, checkVideo, isSafe, warmSafety, SAFETY_DOWN } from './safety.js?v=63';
-import { writeStory, writeActions, beatsText, parseBeats, beatsSentence, breakIntoShots, scenePrompt, gpuPaintPrompt, gpuPortraitPrompt, portraitPrompt, isReal, castFilm, SCENE_COUNT, translateFilm, pickShortMoment, storyFromTranscript } from './story.js?v=63';
-import * as CR from './copyright.js?v=63';
-import { Dictation, narratorsFor, voiceEngine as engineFor, voiceDownload, loadVoice, castVoices, castOptions, speak, playBuffer } from './voice.js?v=63';
-import { languageNames, languageOptionsHTML, findLanguage, whisperCode, ensureScriptFont } from './langs.js?v=63';
-import { mixFilm, previewScore } from './music.js?v=63';
-import { Renderer, buildTimeline, sizeFor, srt, drawnShot } from './renderer.js?v=63';
-import { exportFilm } from './exporter.js?v=63';
-import { depthFor } from './depth.js?v=63';
-import { facesFor } from './faces.js?v=63';
-import { bodiesFor, motionFromVideo, clipMotionIssue } from './body.js?v=63';
-import { askDirector, CAMS, AMBS, LONG, QUICK, NO_CHANGE, HANDOFF, toolOf, handoffPrompt } from './director.js?v=63';
-import { runStudioVoices, studioEngine, filmLines, prepareVoiceSample, recorder, saveMyVoice, loadMyVoice, forgetMyVoice } from './studio.js?v=63';
-import { initCharacters, openVoicePicker, openEditor, openDesigner, openDesignPopup, draftFromFilm, draftFromEntry, applyDraftToFilm, saveDraftToDirectory, renderDirectory, loadDirectory, directory, migrateOldLibrary, castCheck, alwaysAsk, checkedUpload } from './characters.js?v=64';
-import { initDialogue, openDialogue } from './dialogue.js?v=63';
-import { initOutfitPicker, openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=63';
-import { voiceName, matchVoice, lineStyle, findVoice } from './voicebook.js?v=63';
-import { OUTFITS, ensureFields, outfitFromText, outfitById, allowed, outfitIssue, outfitLabel, outfitPrompt, outfitForShot, ageOf } from './outfits.js?v=63';
+import { runVerifiedStage, storyProblems, audioProblems } from './stage-gate.js?v=65';
+import { waitVideoEvent, seekVideo } from './media-readiness.js?v=65';
+import { inspectClipQuality, qualityBlockers, retryShots, requireSingleSpeaker, motionReference } from './clip-quality.js?v=65';
+import { requiresFullFootage, missingFootage, assertFullFootage, footageSummary } from './generation-policy.js?v=65';
+import * as Auth from './auth.js?v=65';
+import * as Store from './store.js?v=65';
+import { paintImage, checkPicture, stockImage, relayStatus, relayHasMotion, refreshRelayMotion, relayCanPaintCast, paintersOut, API, Cancelled, Unsafe, relayFetch } from './ai.js?v=65';
+import { checkImage, checkVideo, isSafe, warmSafety, SAFETY_DOWN } from './safety.js?v=65';
+import { writeStory, writeActions, beatsText, parseBeats, beatsSentence, breakIntoShots, scenePrompt, gpuPaintPrompt, gpuPortraitPrompt, portraitPrompt, isReal, castFilm, SCENE_COUNT, translateFilm, pickShortMoment, storyFromTranscript } from './story.js?v=65';
+import * as CR from './copyright.js?v=65';
+import { Dictation, narratorsFor, voiceEngine as engineFor, voiceDownload, loadVoice, castVoices, castOptions, speak, playBuffer } from './voice.js?v=65';
+import { languageNames, languageOptionsHTML, findLanguage, whisperCode, ensureScriptFont } from './langs.js?v=65';
+import { mixFilm, previewScore } from './music.js?v=65';
+import { Renderer, buildTimeline, sizeFor, srt, drawnShot } from './renderer.js?v=65';
+import { exportFilm } from './exporter.js?v=65';
+import { depthFor } from './depth.js?v=65';
+import { facesFor } from './faces.js?v=65';
+import { bodiesFor, motionFromVideo, clipMotionIssue } from './body.js?v=65';
+import { askDirector, CAMS, AMBS, LONG, QUICK, NO_CHANGE, HANDOFF, toolOf, handoffPrompt } from './director.js?v=65';
+import { runStudioVoices, studioEngine, filmLines, prepareVoiceSample, recorder, saveMyVoice, loadMyVoice, forgetMyVoice } from './studio.js?v=65';
+import { initCharacters, openVoicePicker, openEditor, openDesigner, openDesignPopup, draftFromFilm, draftFromEntry, applyDraftToFilm, saveDraftToDirectory, renderDirectory, loadDirectory, directory, migrateOldLibrary, castCheck, alwaysAsk, checkedUpload } from './characters.js?v=65';
+import { initDialogue, openDialogue } from './dialogue.js?v=65';
+import { initOutfitPicker, openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=65';
+import { voiceName, matchVoice, lineStyle, findVoice } from './voicebook.js?v=65';
+import { OUTFITS, ensureFields, outfitFromText, outfitById, allowed, outfitIssue, outfitLabel, outfitPrompt, outfitForShot, ageOf } from './outfits.js?v=65';
 
 const $ = s => document.querySelector(s);
 // the film-language picker lists every language in langs.js (before any project opens)
@@ -711,6 +711,7 @@ async function doPortraits(signal, { onlyMissing = true, retry = 0 } = {}) {
         try {
           img = await paintImage(portraitPrompt(P, c) + fix, {
             width: 768, height: 1024, seed: seed + attempt * 101, signal,
+            onProvider: note => setStatus('Designing the characters…', `${done} of ${list.length} · ${note}`),
             onWait: sec => setStatus('Designing the characters…', `${done} of ${list.length} · painters busy, retrying in ${sec}s`, done / list.length)
           });
         } catch (e) { if (e.unsafe && e.picture) { fix = SAFE_FIX; console.warn(`Portrait of ${c.name} blocked on this device (nsfw ${e.score?.toFixed(2)})`); continue; } throw e; }
@@ -830,7 +831,7 @@ async function paintScene(i, signal, reseed = false) {
           try { img = await paintImage(scenePrompt(P, sc) + ref.note + fix, opts); }
           catch (e) {
             // the painter that sees the portraits is out for today: paint from the descriptions, then check
-            if (!e.castOut) throw e;
+            if (!e.castOut || e.providersUnavailable) throw e;
             unlocked = true; img = await paintImage(scenePrompt(P, sc) + fix, { ...opts, refs: undefined, lock: false });
           }
         } catch (e) {
@@ -860,6 +861,10 @@ async function paintScene(i, signal, reseed = false) {
       if (best.v) P.checks[key] = { ok: best.v.ok, problems: best.v.problems, model: best.v.model }; else delete P.checks[key];
     } catch (e) {
       if (e instanceof Cancelled) throw e;
+      if (e.providersUnavailable) {
+        toast(`Shot ${i + 1}: ${e.message}`, true, 10000);
+        return; // Do not replace a reference-locked character with unrelated stock.
+      }
       if (e.safetyDown) {
         // the checker could not run: no unchecked picture is used, the card says so
         markBlocked(key, e);

@@ -6,7 +6,7 @@
 //
 // One document per character: users/{uid}/characters/{lid} = { data: <the character file
 // as JSON, pictures made smaller>, updatedAt: <ms> }. Plain REST with the person's ID token.
-import { idToken, authMode, currentUser } from './auth.js?v=63';
+import { idToken, authMode, currentUser } from './auth.js?v=65';
 
 const deps = { fetch: (...a) => fetch(...a), token: idToken, mode: authMode, user: currentUser, projectId: () => window.VF_CONFIG?.firebase?.projectId };
 // (tests swap the network and the login)

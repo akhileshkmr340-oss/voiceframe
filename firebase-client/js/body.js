@@ -1,4 +1,4 @@
-import { waitVideoEvent, seekVideo } from './media-readiness.js?v=63';
+import { waitVideoEvent, seekVideo } from './media-readiness.js?v=65';
 // Live bodies: finds each person's skeleton and outline in a shot's picture on the device
 // (MediaPipe Pose Landmarker, Apache-2.0), so the renderer can bend their arms and legs
 // every frame (gestures while they speak, waving, pointing, walking, dancing) and make

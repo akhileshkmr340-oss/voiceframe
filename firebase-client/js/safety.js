@@ -33,7 +33,7 @@ const simulateFail = () => { try { return localStorage.getItem('vf_safety_test')
 
 function getWorker() {
   if (worker) return worker;
-  worker = new Worker(new URL('./safety-worker.js?v=63', import.meta.url), { type: 'module' });
+  worker = new Worker(new URL('./safety-worker.js?v=65', import.meta.url), { type: 'module' });
   worker.onmessage = e => {
     const p = pending.get(e.data.id);
     if (!p) return;

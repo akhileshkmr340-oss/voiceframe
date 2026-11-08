@@ -1,8 +1,9 @@
+import { imageProviders } from './image-providers.js?v=65';
 // The AI services, all through the site's relay (open models only): writers, painters,
 // voices, transcription and the free GPU jobs; plus Openverse public-domain photos as
 // the last-resort picture.
-import { idToken } from './auth.js?v=63';
-import { checkImage, warmSafety, Unsafe, SafetyDown } from './safety.js?v=63';
+import { idToken } from './auth.js?v=65';
+import { checkImage, warmSafety, Unsafe, SafetyDown } from './safety.js?v=65';
 export { Unsafe, SafetyDown };
 
 export const API = (window.VF_CONFIG?.apiBase || 'api').replace(/\/$/, '');
@@ -170,60 +171,41 @@ function closeOpen(s) {
 // cast's portraits, NVIDIA's free FLUX.1 schnell, Cloudflare FLUX.1, Pollinations) and
 // answers within about a minute; when every painter is busy it says so and the picture
 // is asked for again a little later, so a long film never stalls on one picture.
-// refs: up to four base64 JPEG portraits (under 512 px) that keep faces and clothes the same.
-// After a run of "all painters busy" answers the painters are taken as out for ten
-// minutes: pictures fail at once (the film uses a public-domain photo, or the GPU paints).
-let busyRun = 0, paintersOutUntil = 0;
-export const paintersOut = () => Date.now() < paintersOutUntil;
-// lock: a shot with the cast waits for the painter that sees their portraits instead of
-// going to painters that would invent new faces; throws an error with castOut when that
-// painter is out for the day (the caller decides what to do).
-// painter: one named free painter only ('cloudflare-refs' sees the references; 'nvidia',
-// 'cloudflare', 'pollinations' paint from the words alone), as the character editor's picker asks.
-export async function paintImage(prompt, { width, height, seed, onWait, signal, refs, lock = false, painter = '' }) {
-  lock = lock && !!refs?.length && !painter;
-  // Fail before spending a provider request if the local checker cannot load.
+// Reference-aware edits preserve their references. For new portraits the preferred
+// provider runs first, then each configured alternative at most once. Provider
+// cooldowns and queues are shared across every character in this browser session.
+export const paintersOut = () => imageProviders.allCoolingDown();
+export async function paintImage(prompt, { width, height, seed, onWait, onProvider, signal, refs = [], lock = false, painter = '' }) {
   await warmSafety();
   if (signal?.aborted) throw new Cancelled();
-  if (paintersOut() && !lock && !painter) throw new Error('Free image providers are temporarily unavailable. Your prompt is saved. Try a named provider or retry in a few minutes.');
-  const body = JSON.stringify({ prompt: prompt.slice(0, 1800), width, height, seed, ...(refs?.length ? { refs } : {}), ...(lock ? { lock: true } : {}), ...(painter ? { painter } : {}) });
-  let last = '';
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (!painter) await waitGate('image', onWait, signal);
-    let r;
-    const timeout = AbortSignal.timeout(110000);
-    try {
-      r = await relayFetch(FREE_IMG, { method: 'POST', signal: signal ? AbortSignal.any([signal, timeout]) : timeout, headers: { 'Content-Type': 'application/json' }, body });
-    } catch (e) {
-      if (signal?.aborted) throw new Cancelled();
-      last = 'unreachable'; gate.image = Math.max(gate.image, Date.now() + 5000); continue;
+  return imageProviders.run({ painter, refs, lock, signal, onProgress: onProvider,
+    request: async provider => {
+      const timeout = AbortSignal.timeout(65000);
+      const body = JSON.stringify({ prompt: prompt.slice(0, 1800), width, height, seed, painter: provider,
+        ...(refs.length && provider === 'cloudflare-refs' ? { refs, lock: true } : {}) });
+      let r;
+      try {
+        r = await relayFetch(FREE_IMG, { method: 'POST', signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+          headers: { 'Content-Type': 'application/json' }, body });
+      } catch (error) {
+        if (signal?.aborted) throw new Cancelled();
+        throw Object.assign(new Error('Image provider unreachable'), { retryable: true });
+      }
+      if (r.ok && (r.headers.get('content-type') || '').startsWith('image/')) {
+        const blob = await r.blob();
+        await checkImage(blob); // An unsafe image never triggers a provider fallback.
+        return blob;
+      }
+      const blocked = await unsafeOf(r) || await relayRefusal(r);
+      if (blocked) throw blocked;
+      const status = r.status;
+      const retryable = status === 429 || status >= 500;
+      if (!retryable) throw Object.assign(new Error(`Image request rejected (${status}). Your prompt is kept.`), { status });
+      const seconds = Number(r.headers.get('retry-after'));
+      throw Object.assign(new Error('Image provider unavailable'), { status, retryable: true,
+        retryAfterMs: Number.isFinite(seconds) ? seconds * 1000 : 0 });
     }
-    if (r.ok && (r.headers.get('content-type') || '').startsWith('image/')) {
-      busyRun = 0;
-      const blob = await r.blob();
-      // fail closed: a picture the checker on this device blocks (Unsafe, with .picture) or
-      // can't check (SafetyDown) is never handed to the film
-      await checkImage(blob);
-      return blob;
-    }
-    const blocked = await unsafeOf(r) || await relayRefusal(r);
-    if (blocked) throw blocked;
-    if (r.status >= 400 && r.status < 500 && r.status !== 429) {
-      throw Object.assign(new Error(`Image request rejected (${r.status}). Your prompt is kept. Check the request or sign in again; it was not retried.`), { status: r.status });
-    }
-    if (lock && r.status === 503) {
-      const j = await r.clone().json().catch(() => ({}));
-      if (j.castOut) throw Object.assign(new Error('The cast painter is out for today'), { castOut: true });
-    }
-    // one named painter that is out or busy says so after two tries (the others are not counted as out)
-    if (r.status === 503 && painter) { if (attempt >= 1) throw Object.assign(new Error(`That painter is busy or out for today. Try “Auto” or another painter.`), { painterOut: true }); }
-    else if (r.status === 503 && !lock && ++busyRun >= 8) paintersOutUntil = Date.now() + 600000;
-    if (paintersOut() && !lock && !painter) throw new Error('Free image providers are temporarily unavailable. Your prompt is saved. Try a named provider or retry in a few minutes.');
-    last = r.status + ' ' + (await r.text().catch(() => '')).slice(0, 160);
-    // every painter busy: all pictures wait together (20, 40, 60 s), not each on its own
-    gate.image = Math.max(gate.image, Date.now() + (r.status === 503 || r.status === 429 ? 20000 * (attempt + 1) : 6000));
-  }
-  throw new Error('Image service is busy (' + last + ')');
+  });
 }
 
 // ---------------- picture check ----------------
