@@ -1,9 +1,11 @@
-import { requiresFullFootage, missingFootage, assertFullFootage, footageSummary } from './generation-policy.js?v=58';
+import { waitVideoEvent, seekVideo } from './media-readiness.js?v=60';
+import { inspectClipQuality, qualityBlockers, retryShots, requireSingleSpeaker, motionReference } from './clip-quality.js?v=60';
+import { requiresFullFootage, missingFootage, assertFullFootage, footageSummary } from './generation-policy.js?v=60';
 import * as Auth from './auth.js?v=52';
 import * as Store from './store.js?v=57';
 import { paintImage, checkPicture, stockImage, relayStatus, relayHasMotion, refreshRelayMotion, relayCanPaintCast, paintersOut, API, Cancelled, Unsafe, relayFetch } from './ai.js?v=57';
 import { checkImage, checkVideo, isSafe, warmSafety, SAFETY_DOWN } from './safety.js?v=57';
-import { writeStory, writeActions, beatsText, parseBeats, beatsSentence, breakIntoShots, scenePrompt, gpuPaintPrompt, gpuPortraitPrompt, portraitPrompt, isReal, castFilm, SCENE_COUNT, translateFilm, pickShortMoment, storyFromTranscript } from './story.js?v=57';
+import { writeStory, writeActions, beatsText, parseBeats, beatsSentence, breakIntoShots, scenePrompt, gpuPaintPrompt, gpuPortraitPrompt, portraitPrompt, isReal, castFilm, SCENE_COUNT, translateFilm, pickShortMoment, storyFromTranscript } from './story.js?v=60';
 import * as CR from './copyright.js?v=57';
 import { Dictation, narratorsFor, voiceEngine as engineFor, voiceDownload, loadVoice, castVoices, castOptions, speak, playBuffer } from './voice.js?v=57';
 import { languageNames, languageOptionsHTML, findLanguage, whisperCode, ensureScriptFont } from './langs.js?v=57';
@@ -12,14 +14,14 @@ import { Renderer, buildTimeline, sizeFor, srt, drawnShot } from './renderer.js?
 import { exportFilm } from './exporter.js?v=57';
 import { depthFor } from './depth.js?v=56';
 import { facesFor } from './faces.js?v=52';
-import { bodiesFor, motionFromVideo, clipMotionIssue } from './body.js?v=54';
+import { bodiesFor, motionFromVideo, clipMotionIssue } from './body.js?v=60';
 import { askDirector, CAMS, AMBS, LONG, QUICK, NO_CHANGE, HANDOFF, toolOf, handoffPrompt } from './director.js?v=57';
 import { runStudioVoices, studioEngine, filmLines, prepareVoiceSample, recorder, saveMyVoice, loadMyVoice, forgetMyVoice } from './studio.js?v=57';
 import { initCharacters, openVoicePicker, openEditor, openDesigner, openDesignPopup, draftFromFilm, draftFromEntry, applyDraftToFilm, saveDraftToDirectory, renderDirectory, loadDirectory, directory, migrateOldLibrary, castCheck, alwaysAsk, checkedUpload } from './characters.js?v=59';
 import { initDialogue, openDialogue } from './dialogue.js?v=57';
 import { initOutfitPicker, openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=57';
 import { voiceName, matchVoice, lineStyle, findVoice } from './voicebook.js?v=57';
-import { OUTFITS, ensureFields, outfitFromText, outfitById, allowed, outfitIssue, outfitLabel, ageOf } from './outfits.js?v=57';
+import { OUTFITS, ensureFields, outfitFromText, outfitById, allowed, outfitIssue, outfitLabel, outfitPrompt, outfitForShot, ageOf } from './outfits.js?v=57';
 
 const $ = s => document.querySelector(s);
 // the film-language picker lists every language in langs.js (before any project opens)
@@ -318,6 +320,7 @@ $('#projectSearch').addEventListener('input', () => { clearTimeout(renderProject
 $('#btnNewProject').onclick = () => { newProject(); show('studio'); };
 
 function newProject() {
+  if (job) { toast('Wait for the current job or cancel it before starting another project.'); return; }
   resetMedia();
   P = {
     id: crypto.randomUUID(), uid: user.uid, ownerName: user.name, createdAt: Date.now(),
@@ -329,6 +332,7 @@ function newProject() {
   goStep('idea');
 }
 function openProject(p) {
+  if (job) { toast('Wait for the current job or cancel it before opening another project.'); return; }
   resetMedia();
   P = p;
   $('#ideaInput').value = P.idea || '';
@@ -396,7 +400,7 @@ function updateStepper() {
   const done = {
     idea: !!P.scenes?.length, story: !!P.scenes?.length,
     characters: P.characters?.length && P.characters.every(c => P.images['char-' + c.id]),
-    scenes: allPainted() && (!requiresFullFootage(P) || !missingFootage(P).length), sound: !!mixBuf, film: !!video
+    scenes: allPainted() && (!requiresFullFootage(P) || !footageSummary(P).blocked), sound: !!mixBuf, film: !!video
   };
   if (lastRender) $('#staleNote').hidden = video === lastRender;
   $$('#stepper button').forEach(b => b.classList.toggle('done', !!done[b.dataset.step] && !b.classList.contains('active')));
@@ -954,7 +958,8 @@ function motionWords(sc) {
     + (EXPR_WORDS[sc.expr] ? ` Facial expression: ${EXPR_WORDS[sc.expr]}.` : '');
 }
 function motionPrompt(sc) {
-  return motionPromptBase(sc).replace(' Realistic, cinematic', choreography(sc) + motionWords(sc) + ' Hands keep hold of whatever they hold (strings, books, cups); hands and fingers stay natural. Continuous motion, realistic gravity, no morphing. Realistic, cinematic');
+  const castLock = castOf(sc).map(c => `${c.name}: ${outfitPrompt(outfitForShot(c, sc), c)}`).join('; ');
+  return (castLock ? `Keep the exact faces, hair, body proportions and clothing of the input image throughout. Wardrobe: ${castLock}. ` : '') + motionPromptBase(sc).replace(' Realistic, cinematic', choreography(sc) + motionWords(sc) + ' One physical action at a time, with slow continuous joint movement; gestures do not teleport or switch hands. Hands keep hold of whatever they hold (strings, books, cups); hands and fingers stay natural. Continuous motion, realistic gravity, no morphing. Realistic, cinematic');
 }
 function motionPromptBase(sc) {
   if (sc.beats?.length) sc = { ...sc, action: beatsSentence(sc.beats) };
@@ -984,29 +989,27 @@ function clipFrames() {
 // Puts a clip on scene i: its first frame becomes the scene picture.
 // ---- clip quality gate ----
 // A frame of a clip at a point of its length (0-1), as a JPEG.
-async function frameAt(blob, frac) {
+async function frameAt(blob, frac, signal) {
   const v = document.createElement('video'), url = URL.createObjectURL(blob);
   v.muted = true; v.preload = 'auto'; v.src = url;
   try {
-    await new Promise((res, rej) => { v.onloadeddata = res; v.onerror = () => rej(new Error('unreadable clip')); });
-    v.currentTime = Math.max(0, Math.min(v.duration - 0.05, v.duration * frac));
-    await new Promise(res => { v.onseeked = res; });
+    if (v.readyState < 2) await waitVideoEvent(v, 'loadeddata', {signal});
+    await seekVideo(v, Math.max(0, Math.min(v.duration - 0.05, v.duration * frac)), {signal});
     const c = new OffscreenCanvas(v.videoWidth, v.videoHeight);
     c.getContext('2d').drawImage(v, 0, 0);
     return c.convertToBlob({ type: 'image/jpeg', quality: 0.9 });
-  } finally { URL.revokeObjectURL(url); }
+  } finally { URL.revokeObjectURL(url); v.removeAttribute('src'); v.load(); }
 }
 // Technical faults of an AI clip, from 10 small frames: black, frozen (nothing moves) or
 // flickering (the picture jumps back and forth). Returns the fault, or '' when it is fine.
-async function clipFault(blob) {
+async function clipFault(blob, signal) {
   const v = document.createElement('video'), url = URL.createObjectURL(blob);
   v.muted = true; v.preload = 'auto'; v.src = url;
   try {
-    await new Promise((res, rej) => { v.onloadeddata = res; v.onerror = () => rej(new Error('unreadable')); });
+    if (v.readyState < 2) await waitVideoEvent(v, 'loadeddata', {signal});
     const c = new OffscreenCanvas(64, 36), x = c.getContext('2d', { willReadFrequently: true }), frames = [];
     for (let k = 0; k < 10; k++) {
-      v.currentTime = v.duration * (0.04 + 0.92 * k / 9);
-      await new Promise(res => { v.onseeked = res; });
+      await seekVideo(v, v.duration * (0.04 + 0.92 * k / 9), {signal});
       x.drawImage(v, 0, 0, 64, 36);
       const d = x.getImageData(0, 0, 64, 36).data, g = new Float32Array(64 * 36);
       for (let p = 0; p < g.length; p++) g[p] = 0.3 * d[p * 4] + 0.59 * d[p * 4 + 1] + 0.11 * d[p * 4 + 2];
@@ -1022,26 +1025,29 @@ async function clipFault(blob) {
     for (let k = 2; k < frames.length; k++) if (steps[k - 1] > 35 && diff(frames[k - 2], frames[k]) < steps[k - 1] * 0.35) flick++;
     if (flick >= 2) return 'flickering';
     return '';
-  } catch { return 'unreadable'; } finally { URL.revokeObjectURL(url); }
+  } catch (e) { if (signal?.aborted) throw e; return 'unreadable'; } finally { URL.revokeObjectURL(url); v.removeAttribute('src'); v.load(); }
 }
 // After a GPU clip lands: its middle frame is checked against the cast (in the background;
 // a wrong face is flagged, the clip is kept for the person to decide).
-function checkClipMotion(i, file) {
-  clipMotionIssue(file).then(issue => {
-    if (!issue || P.videos?.['scene-' + i] !== file) return;
-    (P.clipIssues ||= {})['scene-' + i] = 'check the motion: ' + issue;
-    picked.add(i); updateFixBar(); renderSceneImage(i); save();
-  }).catch(e => console.warn('motion check', e));
-}
-function checkClipCast(i, file) {
-  if (!checksOn() || !castOf(P.scenes[i]).length) return;
-  frameAt(file, 0.5).then(f => checkShot(f, P.scenes[i])).then(v => {
-    if (!v || P.videos?.['scene-' + i] !== file) return;
-    P.clipIssues ||= {};
-    if (v.ok) delete P.clipIssues['scene-' + i];
-    else { P.clipIssues['scene-' + i] = 'clip: ' + (v.problems[0] || 'cast check failed'); picked.add(i); updateFixBar(); }
-    renderSceneImage(i); save();
-  }).catch(e => console.warn('clip check', e));
+async function checkGeneratedClip(i, file, signal, technical = '') {
+  const project = P, scene = project.scenes[i], key = 'scene-' + i;
+  (project.clipQuality ||= {})[key] = { state:'pending', problems:[], approved:false };
+  motionNote = `Checking shot ${i + 1}: character continuity and natural movement…`;
+  save(); syncWorkspaceState();
+  const verdict = await inspectClipQuality({ technical,
+    cast: async () => {
+      if (!checksOn() || !castOf(scene).length) return null;
+      const samples = [];
+      for (const at of [.2,.5,.8]) samples.push(await checkShot(await frameAt(file, at, signal), scene, signal));
+      return {ok:samples.every(v=>v?.ok),problems:samples.flatMap(v=>v?.problems || (!v?.ok ? ['No cast verdict returned'] : []))};
+    },
+    motion: () => clipMotionIssue(file, signal)
+  });
+  if (P !== project || project.videos?.[key] !== file) return;
+  project.clipQuality[key] = verdict;
+  if (verdict.problems.length) { (project.clipIssues ||= {})[key] = verdict.problems.join(' · '); picked.add(i); updateFixBar(); }
+  else if (project.clipIssues) delete project.clipIssues[key];
+  renderSceneImage(i); save(); syncWorkspaceState();
 }
 
 async function attachClip(i, file, model, signal, from = null) {
@@ -1060,6 +1066,7 @@ async function attachClip(i, file, model, signal, from = null) {
     P.images['prev-' + i] = P.images['scene-' + i]; P.credits['prevc-' + i] = P.credits['scene-' + i] || null;
   }
   if (from) P.credits['review-' + i] = true;
+  if (from && P.credits['scene-' + i]?.kind !== 'clip' && P.images['scene-' + i]) P.images['motion-source-' + i] = P.images['scene-' + i];
   P.images['scene-' + i] = poster;
   // a GPU clip's first frame is AI-made, not the person's own image
   P.credits['scene-' + i] = from ? { kind: 'clip' } : { kind: 'user' };
@@ -1068,7 +1075,8 @@ async function attachClip(i, file, model, signal, from = null) {
   delete P.scenes[i].lipStale;
   delete P.credits['want-' + i];
   if (P.clipIssues) delete P.clipIssues['scene-' + i];
-  if (from) { checkClipCast(i, file); checkClipMotion(i, file); }
+  if (P.clipQuality) delete P.clipQuality['scene-' + i];
+  if (from) await checkGeneratedClip(i, file, signal);
   // black bars left out, the people kept in frame (the shot's sc.fill says how it fills the frame)
   await frameClip(i, file).catch(e => console.warn(`Shot ${i + 1}: frame check`, e.message));
   video = null; staleDownload();
@@ -1662,15 +1670,23 @@ async function sendToGpu(signal, job, want, { lipOnly = false, fresh = false } =
     } else {
       const pic = P.credits['scene-' + i];
       if (pic?.job === job) shot.painted = `jobs/${pic.job}/pics/scene-${pad(pic.n)}.jpg`; // already in this job's storage
-      else files.push({ name: shot.file, b64: await toBase64(await cropForClip(P.images['scene-' + i], w, h)) });
+      else files.push({ name: shot.file, b64: await toBase64(await cropForClip(motionReference(P, i), w, h)) });
       Object.assign(shot, { prompt: motionPrompt(P.scenes[i]), frames: frames[i], ...(fresh ? { seed: Math.floor(Math.random() * 1e9) } : {}) });
     }
     // Speaking shots carry their recorded line, and where it starts in the clip, so the
     // GPU can sync the speaker's lips to it.
-    const line = tl?.segments.find(g => g.scene === i && g.speaker);
+    const lines = tl?.segments.filter(g => g.scene === i && g.speaker && g.buffer) || [];
+    requireSingleSpeaker(lines, i);
+    const line = lines[0];
     // a real person's face (their own photo, real footage) is animated gently but never lip-synced
     if (line?.buffer && !realFace(i)) {
-      files.push({ name: `scene-${pad(n)}.wav`, b64: await toBase64(await wav16k(line.buffer)) });
+      const start = line.start;
+      const end = Math.max(...lines.map(g => g.start + g.buffer.duration));
+      const lead = line.start - (tl.scenes[i].start - tl.xf / 2);
+      if (end - start + lead > (frames[i] - 1) / 16 + .05) throw new Error(`Shot ${n} has more speech than its video clip can contain. Split the dialogue into shorter shots before generating motion.`);
+      const audio = new OfflineAudioContext(1, Math.ceil((end - start) * 16000), 16000);
+      for (const g of lines) { const source = audio.createBufferSource(); source.buffer = g.buffer; source.connect(audio.destination); source.start(g.start - start); }
+      files.push({ name: `scene-${pad(n)}.wav`, b64: await toBase64(await wav16k(await audio.startRendering())) });
       Object.assign(shot, { lip: true, audio: `scene-${pad(n)}.wav`, lead: +(line.start - (tl.scenes[i].start - tl.xf / 2)).toFixed(3) });
     }
     scenes.push(shot);
@@ -1738,7 +1754,7 @@ async function collectClips(signal, job, want, { lipOnly = false, speaking = 0, 
         const { url } = await relay('clip', null, `&job=${job}&n=${n}`);
         const blob = await (await fetch(url, { signal })).blob();
         // a black, frozen or flickering clip is not used: the shot keeps its picture with live characters
-        const fault = await clipFault(blob);
+        const fault = await clipFault(blob, signal);
         if (/black|unreadable/.test(fault)) {
           (P.clipIssues ||= {})['scene-' + (n - 1)] = 'AI clip not used: ' + fault;
           picked.add(n - 1); updateFixBar(); renderSceneImage(n - 1);
@@ -1754,7 +1770,7 @@ async function collectClips(signal, job, want, { lipOnly = false, speaking = 0, 
           have.add(n); save();
           continue;
         }
-        if (fault) { (P.clipIssues ||= {})['scene-' + (n - 1)] = 'review the AI clip: ' + fault; picked.add(n - 1); updateFixBar(); renderSceneImage(n - 1); }
+        if (fault) { (P.clipQuality ||= {})['scene-' + (n - 1)] = {state:'review',approved:false,problems:[fault,...(P.clipQuality?.['scene-' + (n - 1)]?.problems || [])]}; (P.clipIssues ||= {})['scene-' + (n - 1)] = 'review the AI clip: ' + P.clipQuality['scene-' + (n - 1)].problems.join(' · '); picked.add(n - 1); updateFixBar(); renderSceneImage(n - 1); }
         have.add(n); save();
         motionNote = `Downloading the finished clips: ${have.size} of ${want.length}`;
       }
@@ -2126,7 +2142,7 @@ function shotStatus(i) {
   return (P.videos?.['scene-' + i] ? '<span class="st ok" title="' + esc(motionKind(i)) + '">🎬 AI video</span>' : P.images['scene-' + i] ? '<span class="st" title="' + esc(motionKind(i)) + '">🖼️ picture + live characters</span>' : '<span class="st warn">no picture</span>')
     + (s.lipStale ? ' <span class="st warn">👄 line changed: re-sync lips</span>' : '')
     + (missed ? ` <span class="st warn" title="${esc(P.credits['want-' + i].error ? 'GPU error: ' + P.credits['want-' + i].error : 'It was sent to the free GPU but no clip came back.')} Tick it and press 🎬 Re-animate.">⚠ ${requiresFullFootage(P) ? 'AI video missing: full-motion export is blocked' : 'AI video not made: showing basic animation'}${P.credits['want-' + i].error ? ' (' + esc(P.credits['want-' + i].error.slice(0, 50)) + ')' : ''}</span>` : '')
-    + (P.credits['review-' + i] && P.videos?.['scene-' + i] ? ' <span class="st warn review">👀 New AI clip (hover to preview): <button class="btn btn-ghost btn-sm s-keep">✓ Keep</button><button class="btn btn-ghost btn-sm s-reject">✕ Reject</button></span>' : '')
+    + (!P.clipQuality?.['scene-' + i]?.approved && (P.credits['review-' + i] || P.clipIssues?.['scene-' + i]) && P.videos?.['scene-' + i] ? ' <span class="st warn review">👀 New AI clip (hover to preview): <button class="btn btn-ghost btn-sm s-keep">✓ Keep</button><button class="btn btn-ghost btn-sm s-reject">✕ Reject</button></span>' : '')
     + (walks && !missed ? ' <span class="st" title="Walking, running and dancing need real AI video: tick it and press 🎬 Re-animate (free GPU)">🚶 needs AI video for real walking</span>' : '')
     + (P.clipIssues?.['scene-' + i] ? ` <span class="st warn" title="Tick it and press 🎬 Re-animate to make a new clip">⚠ ${esc(P.clipIssues['scene-' + i])}</span>` : '')
     + (P.checks?.['scene-' + i] ? (P.checks['scene-' + i].ok ? ' <span class="st ok" title="An AI compared it with the script and the cast portraits">✓ cast checked</span>'
@@ -2372,8 +2388,10 @@ $('#sceneList').addEventListener('click', e => {
   }
   if (e.target.closest('.s-lipface')) showFacePicker(i, card).catch(error => toast(error.message, true, 6000));
   if (e.target.closest('.s-keep')) {
+    if (P.clipQuality?.['scene-' + i]?.state === 'pending') { toast('The clip checks are still running.'); return; }
+    (P.clipQuality ||= {})['scene-' + i] = {...P.clipQuality?.['scene-' + i],state:'reviewed',approved:true};
     delete P.credits['review-' + i]; delete P.images['prev-' + i]; delete P.credits['prevc-' + i];
-    renderSceneImage(i); save(); return;
+    renderSceneImage(i); syncWorkspaceState(); save(); return;
   }
   if (e.target.closest('.s-reject')) {
     // back to the picture it had, with basic motion
@@ -4126,7 +4144,7 @@ async function enterFilm() {
   renderMeta(); renderChecklist(); renderShare();
   $('#filmTitle').textContent = P.title;
   syncWorkspaceState();
-  if (requiresFullFootage(P) && missingFootage(P).length) { autoRender = false; $('#filmMeta').textContent = 'Waiting for full-motion footage. Completed clips are saved.'; return; }
+  if (requiresFullFootage(P) && footageSummary(P).blocked) { autoRender = false; $('#filmMeta').textContent = 'Waiting for full-motion footage. Completed clips are saved.'; return; }
   // Arriving here with missing portraits, scenes or sound (e.g. after "write the
   // story first"): make them now instead of rendering placeholders.
   const noPortrait = () => P.characters.some(c => !P.images['char-' + c.id] && !triedPortraits.has(c.id));
@@ -4471,12 +4489,12 @@ function syncWorkspaceState() {
   $('#workspaceGpu').textContent = relayHasMotion() ? 'GPU service enabled' : 'GPU unavailable';
   $('#workspaceGpu').classList.toggle('warn', !relayHasMotion());
   $('#fullMotionBlock').hidden = !summary.blocked;
-  if (summary.blocked) $('#fullMotionBlockText').textContent = `${summary.ready} of ${summary.total} shots have footage. ${summary.total - summary.ready} still need video. Full-motion export waits for actual clips. Use the storyboard to retry unfinished shots or import footage.`;
+  if (summary.blocked) $('#fullMotionBlockText').textContent = `${summary.ready} of ${summary.total} shots have footage. ${summary.total - summary.ready} still need video. ${summary.review} shot(s) need quality review. Full-motion export waits for actual clips and checks. Use the storyboard to retry unfinished shots or import footage.`;
 }
 $('#btnRetryMissingMotion').onclick = () => {
   if (!P || job) { toast('Wait for the current step or cancel waiting first.'); return; }
   if (P.gpuRun) { $('#btnCollect').click(); return; }
-  const missing = missingFootage(P);
+  const missing = retryShots(P, missingFootage(P));
   if (!missing.length) { toast('All cinematic shots have footage.'); return; }
   picked.clear(); missing.forEach(i => picked.add(i)); renderScenes(); goStep('scenes');
   if (!job) fixShots('animate');
