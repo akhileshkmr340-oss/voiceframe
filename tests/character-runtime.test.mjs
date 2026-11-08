@@ -47,3 +47,18 @@ test('a failed safety backend restarts in a new worker on retry',async()=>{
   const warm=new Function('Worker','localStorage',source+'; return warmSafety;')(Worker,{getItem:()=>null});
   await assert.rejects(warm(),/Safety check unavailable/);await warm();assert.equal(workers.length,2);assert.equal(workers[0].terminated,true);
 });
+test('first character generation honors the provider and retries retain the brief and chosen name',async()=>{
+  const source=readFileSync(new URL('../firebase-client/js/characters.js',import.meta.url),'utf8');
+  const body=source.slice(source.indexOf('async function designFromWords('),source.indexOf('function wireEditor()'));
+  const ed={d:{name:'My character',ageYears:28,gender:'female',outfit:{id:'custom'}},briefFor:null};
+  let writers=0,paints=0;const options=[];
+  const deps={ed,$:()=>({value:'nvidia'}),ctx:{setStatus:()=>{}},preparePrompt:async t=>t,
+    chat:async()=>{writers++;return '{"name":"Different name","appearance":"An adult wearing a navy jacket"}';},parseJSON:JSON.parse,
+    ageOf:()=>28,ageClass:()=> 'adult',ensureFields:()=>{},renderEditor:()=>{},addVersion:()=>{},
+    paint:async(view,change,opts)=>{options.push(opts);if(++paints===1)throw Error('provider busy');return new Blob(['portrait']);}};
+  const run=new Function('deps',`const {${Object.keys(deps).join(',')}}=deps;return ${body}`)(deps);
+  await assert.rejects(run('Original full character prompt'),/provider busy/);
+  await run('Original full character prompt');
+  assert.equal(writers,1);assert.equal(ed.d.name,'My character');assert.equal(ed.d.designPrompt,'Original full character prompt');
+  assert.deepEqual(options,[{painter:'nvidia',format:'portrait'},{painter:'nvidia',format:'portrait'}]);
+});

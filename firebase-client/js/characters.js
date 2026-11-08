@@ -333,7 +333,7 @@ const ed = { d: null, view: 'portrait', shownId: null, mode: 'film', onDone: nul
 export function openEditor(draft, { onDone, back = 'studio' } = {}) {
   ed.d = draft; ed.mode = draft.src; ed.onDone = onDone; ed.back = back;
   ed.view = draft.portrait || !draft.sheet ? 'portrait' : 'sheet';
-  ed.shownId = null; ed.busy = false;
+  ed.shownId = null; ed.busy = false; ed.briefFor = null;
   $('#ceDescribe').value = draft.designPrompt || '';
   $('#ceAsk').value = '';
   ed.sig = sigOf(draft);
@@ -449,6 +449,13 @@ async function preparePrompt(text, signal, maxChars = 6000) {
 }
 async function designFromWords(text, signal) {
   ed.d.designPrompt = text;
+  const draw = async () => {
+    ctx.setStatus('Painting the portrait…', 'Using your selected image provider; your character brief is kept on retry');
+    const img = await paint('portrait', '', { painter: $('#cePainter').value, format: 'portrait' }, signal);
+    addVersion(img, 'portrait', 'designed', 'from your description');
+    ed.d.realPhoto = false;
+  };
+  if (ed.briefFor === text && ed.d.appearance) return draw();
   const brief = await preparePrompt(text, signal);
   ctx.setStatus('Writing the casting brief…', 'The AI casting director reads your description');
   const reply = await chat([
@@ -462,17 +469,15 @@ JSON: {"name":"","gender":"female|male|other","ageYears":30,"outfit":"their main
   const d = ed.d, one = (v, ok, dflt) => ok.includes(v) ? v : dflt;
   const years = Math.round(+j.ageYears) > 0 && Math.round(+j.ageYears) < 110 ? Math.round(+j.ageYears) : ageOf(d);
   Object.assign(d, {
-    name: String(j.name || d.name).slice(0, 40), gender: d.gender || one(j.gender, ['female', 'male', 'other'], 'other'), ageYears: +d.ageYears || years, age: ageClass(+d.ageYears || years),
+    name: String(d.name && d.name !== 'New character' ? d.name : j.name || d.name).slice(0, 40), gender: d.gender || one(j.gender, ['female', 'male', 'other'], 'other'), ageYears: +d.ageYears || years, age: ageClass(+d.ageYears || years),
     role: one(j.role, ['protagonist', 'ally', 'antagonist', 'mentor', 'other'], 'other'), appearance: String(j.appearance || '').slice(0, 400),
     personality: String(j.personality || '').slice(0, 80), info: d.info || String(j.info || text).slice(0, 600), era: String(j.era || '').slice(0, 40), setting: String(j.setting || '').slice(0, 80)
   });
   // the outfit the person chose stays; otherwise the writer's, matched to the catalogue (age-gated)
   if (!d.outfit) { const tmp = { ...d, outfit: null, wardrobe: [], outfitWords: typeof j.outfit === 'string' ? j.outfit : '' }; ensureFields(tmp); d.outfit = tmp.outfit; d.wardrobe = tmp.wardrobe; }
   renderEditor();
-  ctx.setStatus('Painting the portrait…', 'A photo-real person who does not exist (free FLUX painter)');
-  const img = await paint('portrait', '', {}, signal);
-  addVersion(img, 'portrait', 'designed', 'from your description');
-  d.realPhoto = false;
+  ed.briefFor = text;
+  await draw();
 }
 function wireEditor() {
   $('#ceName').addEventListener('input', e => { ed.d.name = e.target.value.slice(0, 40); $('#ceTitle').textContent = ed.d.name || 'Untitled character'; });
