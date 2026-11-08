@@ -5,7 +5,7 @@
 // Version 3 adds the character directory ('characters'), one record per saved character
 // (its sheet, portrait, history, voice and info, all on this device). The upgrade only adds
 // that store: the projects and media stores are left exactly as they are.
-const DB = 'voiceframe', VER = 3;
+const DB = 'voiceframe', VER = 4;
 const KINDS = ['images', 'videos', 'files']; // files: e.g. the narration a film was made from
 let dbp;
 
@@ -17,6 +17,7 @@ function db() {
       if (!d.objectStoreNames.contains('projects')) d.createObjectStore('projects', { keyPath: 'id' }).createIndex('uid', 'uid');
       if (!d.objectStoreNames.contains('media')) d.createObjectStore('media'); // key: "<project id>|images|scene-3"
       if (!d.objectStoreNames.contains('characters')) d.createObjectStore('characters', { keyPath: 'lid' }).createIndex('uid', 'uid');
+      if (!d.objectStoreNames.contains('motions')) d.createObjectStore('motions', { keyPath: 'id' }).createIndex('uid', 'uid');
     };
     // another tab still has the older version open: it is asked to let go (below), and
     // this page says so instead of waiting silently
@@ -106,6 +107,20 @@ export const deleteCharacter = lid => tx('characters', 'readwrite', s => s.delet
 export async function listCharacters(uid) {
   const list = await tx('characters', 'readonly', s => s.index('uid').getAll(uid));
   return list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
+
+// Reusable footage is independent of its source project. Deleting a film must not
+// delete clips explicitly saved to this library. Blobs never leave this device.
+export async function saveMotion(entry) {
+  if (!entry.uid || !(entry.blob instanceof Blob) || !entry.blob.size) throw new Error('Sign in and choose a completed video clip.');
+  const id = entry.id || crypto.randomUUID();
+  await tx('motions', 'readwrite', s => s.put({ ...entry, id, updatedAt: Date.now() }));
+  return id;
+}
+export async function listMotions(uid) {
+  if (!uid) return [];
+  return (await tx('motions', 'readonly', s => s.index('uid').getAll(uid)))
+    .sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
 // The library list carries only each film's first picture (for its card).

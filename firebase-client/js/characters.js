@@ -4,7 +4,7 @@ import { compactPrompt } from './character-prompt.js?v=59';
 // saved characters, on this device) and uploads of their own character pictures.
 // The film's own character page and the stand-alone Character Designer are the same editor:
 // both edit a draft and both save to the same directory.
-import * as Store from './store.js?v=57';
+import * as Store from './store.js?v=61';
 import { paintImage, checkPicture, chat, parseJSON, Cancelled } from './ai.js?v=57';
 import { checkImage, SAFETY_DOWN } from './safety.js?v=57';
 import { portraitPrompt } from './story.js?v=57';

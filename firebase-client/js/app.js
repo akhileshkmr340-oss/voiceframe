@@ -1,6 +1,6 @@
 import { requiresFullFootage, missingFootage, assertFullFootage, footageSummary } from './generation-policy.js?v=58';
 import * as Auth from './auth.js?v=52';
-import * as Store from './store.js?v=57';
+import * as Store from './store.js?v=61';
 import { paintImage, checkPicture, stockImage, relayStatus, relayHasMotion, refreshRelayMotion, relayCanPaintCast, paintersOut, API, Cancelled, Unsafe, relayFetch } from './ai.js?v=57';
 import { checkImage, checkVideo, isSafe, warmSafety, SAFETY_DOWN } from './safety.js?v=57';
 import { writeStory, writeActions, beatsText, parseBeats, beatsSentence, breakIntoShots, scenePrompt, gpuPaintPrompt, gpuPortraitPrompt, portraitPrompt, isReal, castFilm, SCENE_COUNT, translateFilm, pickShortMoment, storyFromTranscript } from './story.js?v=57';
@@ -15,7 +15,7 @@ import { facesFor } from './faces.js?v=52';
 import { bodiesFor, motionFromVideo, clipMotionIssue } from './body.js?v=54';
 import { askDirector, CAMS, AMBS, LONG, QUICK, NO_CHANGE, HANDOFF, toolOf, handoffPrompt } from './director.js?v=57';
 import { runStudioVoices, studioEngine, filmLines, prepareVoiceSample, recorder, saveMyVoice, loadMyVoice, forgetMyVoice } from './studio.js?v=57';
-import { initCharacters, openVoicePicker, openEditor, openDesigner, openDesignPopup, draftFromFilm, draftFromEntry, applyDraftToFilm, saveDraftToDirectory, renderDirectory, loadDirectory, directory, migrateOldLibrary, castCheck, alwaysAsk, checkedUpload } from './characters.js?v=59';
+import { initCharacters, openVoicePicker, openEditor, openDesigner, openDesignPopup, draftFromFilm, draftFromEntry, applyDraftToFilm, saveDraftToDirectory, renderDirectory, loadDirectory, directory, migrateOldLibrary, castCheck, alwaysAsk, checkedUpload } from './characters.js?v=61';
 import { initDialogue, openDialogue } from './dialogue.js?v=57';
 import { initOutfitPicker, openOutfitPicker, applyOutfitToFilm } from './outfit-ui.js?v=57';
 import { voiceName, matchVoice, lineStyle, findVoice } from './voicebook.js?v=57';
@@ -2180,6 +2180,8 @@ function renderScenes() {
           <button class="btn btn-ghost s-repaint" title="New picture from the free picture services">🎨 Repaint</button>
           <label class="btn btn-ghost" title="Use my own picture">⬆ Image<input type="file" accept="image/*" class="s-upload" hidden></label>
           <label class="btn btn-ghost" title="Use my own video clip">⬆ Video<input type="file" accept="video/*,.mp4,.webm,.mov" class="s-upload-video" hidden></label>
+          ${clip ? '<button class="btn btn-ghost s-save-motion" type="button">▣ Save motion</button>' : ''}
+          <button class="btn btn-ghost s-reuse-motion" type="button" title="Reuse a saved clip without generation GPU time">▤ Motion library</button>
           <button class="btn btn-ghost s-stock" type="button" title="Use real free stock footage (Pexels / Wikimedia Commons) for this shot. Best for scenery and crowds: a stock clip can't show your own characters">🎥 Real footage</button>
           <label class="btn btn-ghost" title="Copy how a person moves in a video of yours (read on this device; the video is not uploaded)">🕺 Copy motion<input type="file" accept="video/*,.mp4,.webm,.mov" class="s-motionref" hidden></label>
           ${s.motionRef ? '<button class="btn btn-ghost s-motionref-clear" title="Stop copying the motion">✕ copied motion</button>' : ''}
@@ -2192,6 +2194,47 @@ function renderScenes() {
   P.scenes.forEach((_, i) => renderSceneImage(i));
   updateFixBar();
 }
+async function saveShotMotion(i) {
+  const blob = P?.videos?.['scene-' + i];
+  if (!blob || !user?.uid) throw new Error('Sign in and finish a video shot first.');
+  const scene = P.scenes[i];
+  const name = prompt('Name this reusable motion clip', scene.title || `Shot ${i + 1}`);
+  if (!name?.trim()) return;
+  await Store.saveMotion({ uid: user.uid, name: name.trim(), blob,
+    poster: P.images['scene-' + i], credit: structuredClone(P.credits['video-' + i] || {}),
+    sourceProject: P.id, characterNames: (P.characters || []).map(c => c.name),
+    action: scene.action || '', dialogue: structuredClone(scene.dialogue || []) });
+  toast('Motion saved on this device. Reuse it in another film without generation GPU time.', false, 6500);
+}
+
+async function openMotionLibrary(i) {
+  const project = P, uid = user?.uid;
+  if (!uid) throw new Error('Sign in to open your motion library.');
+  const entries = await Store.listMotions(uid);
+  if (P !== project || user?.uid !== uid) return;
+  const dialog = document.createElement('dialog');
+  dialog.style.cssText = 'width:min(720px,92vw);max-height:85dvh;overflow:auto;padding:24px;border-radius:16px;background:var(--panel,#18202f);color:inherit;border:1px solid #64748b';
+  const previewURLs = entries.map(entry => URL.createObjectURL(entry.blob));
+  dialog.innerHTML = `<h2>▤ Saved motion</h2><p>Reuse the exact footage with no generation GPU time. New actions or lip-sync require processing. Saved on this browser and device; download a backup before clearing site data.</p><button class="btn motion-close" type="button">Close</button><div>${entries.length ? entries.map((entry, k) => `<article style="padding:16px 0;border-bottom:1px solid #64748b"><h3>${esc(entry.name)}</h3><p>${esc((entry.characterNames || []).join(', '))}</p><video controls playsinline preload="metadata" src="${previewURLs[k]}" style="width:100%;max-height:240px"></video><div><button class="btn motion-use" type="button" data-entry="${k}">Use in shot ${i + 1}</button> <a class="btn" href="${previewURLs[k]}" download="${slug(entry.name)}.${entry.blob.type.includes('webm') ? 'webm' : 'mp4'}">Download backup</a></div></article>`).join('') : '<p>No saved clips yet. Choose “Save motion” on a completed shot.</p>'}</div>`;
+  const dispose = () => { previewURLs.forEach(url => URL.revokeObjectURL(url)); dialog.remove(); };
+  dialog.addEventListener('close', dispose, { once: true });
+  dialog.querySelector('.motion-close').onclick = () => dialog.close();
+  dialog.querySelectorAll('.motion-use').forEach(button => button.onclick = () => {
+    if (P !== project || user?.uid !== uid || !P.scenes[i]) { dialog.close(); return; }
+    const entry = entries[+button.dataset.entry];
+    dialog.close();
+    runJob(async signal => {
+      pushUndo('reuse saved motion');
+      // Keep normal video decoding and safety checks; never invoke a generator.
+      await replaceShotClip(i, entry.blob, entry.credit?.model || 'Saved motion', signal);
+      P.credits['video-' + i] = { ...P.credits['video-' + i], reusedFrom: entry.id, sourceCredit: entry.credit };
+      await save(true);
+      toast('Saved footage reused. Review its original speech against this scene before export.', false, 6500);
+    });
+  });
+  document.body.append(dialog); dialog.showModal();
+}
+
 function renderSceneImage(i) {
   const box = document.querySelector(`[data-img="scene-${i}"]`);
   if (!box) return;
@@ -2358,6 +2401,8 @@ $('#sceneList').addEventListener('change', e => {
 $('#sceneList').addEventListener('click', e => {
   const card = e.target.closest('[data-scene]'); if (!card || job) return;
   const i = +card.dataset.scene, n = P.scenes.length;
+  if (e.target.closest('.s-save-motion')) { saveShotMotion(i).catch(error => toast(error.message, true)); return; }
+  if (e.target.closest('.s-reuse-motion')) { openMotionLibrary(i).catch(error => toast(error.message, true)); return; }
   if (e.target.closest('.s-play')) playSceneClip(i, card).catch(error => toast(error.message, true, 10000));
   if (e.target.closest('.s-stock')) {
     runJob(async signal => {
