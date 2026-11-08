@@ -3,9 +3,9 @@
 // Arabic, Hebrew, Urdu…), how it is delivered, and on request its English meaning.
 // An edit re-voices only that line (the voice cache keeps every other line) and marks only
 // that shot's lip-sync as out of date.
-import { chat, parseJSON } from './ai.js?v=65';
-import { findLanguage, isRTL, isRTLText, ensureScriptFont } from './langs.js?v=65';
-import { DELIVERIES } from './voicebook.js?v=65';
+import { chat, parseJSON } from './ai.js?v=66';
+import { findLanguage, isRTL, isRTLText, ensureScriptFont } from './langs.js?v=66';
+import { DELIVERIES } from './voicebook.js?v=66';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

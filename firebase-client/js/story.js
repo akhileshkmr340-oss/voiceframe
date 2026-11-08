@@ -1,9 +1,9 @@
 // Story writer, character designer and prompt builder.
-import { chat, parseJSON, Unsafe } from './ai.js?v=65';
+import { chat, parseJSON, Unsafe } from './ai.js?v=66';
 
-import { ORIGINAL_RULES } from './copyright.js?v=65';
-import { writeIn, findLanguage, sentences, wordCount } from './langs.js?v=65';
-import { ensureFields, outfitPrompt, outfitForShot, personWords } from './outfits.js?v=65';
+import { ORIGINAL_RULES } from './copyright.js?v=66';
+import { writeIn, findLanguage, sentences, wordCount } from './langs.js?v=66';
+import { ensureFields, outfitPrompt, outfitForShot, personWords } from './outfits.js?v=66';
 
 export const SCENE_COUNT = { shorts: 5, short: 6, medium: 10, long: 16, film5: 32, film10: 64, film15: 96 };
 // most characters a film may have: long films carry a bigger cast

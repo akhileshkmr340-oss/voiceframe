@@ -22,10 +22,10 @@ test('safety, authentication and user allowance failures stop without switching 
     let calls=0;await assert.rejects(new ImageProviderPool().run({request:async()=>{calls++;throw error;}}));assert.equal(calls,1);
   }
 });
-test('all failed providers stop at four calls and an immediate retry makes no new calls',async()=>{
+test('all failed providers stop at five calls and an immediate retry makes no new calls',async()=>{
   let calls=0;const pool=new ImageProviderPool();const request=async()=>{calls++;throw unavailable();};
-  await assert.rejects(pool.run({request}),/All configured/);assert.equal(calls,4);assert.equal(pool.allCoolingDown(),true);
-  await assert.rejects(pool.run({request}),/All configured/);assert.equal(calls,4);
+  await assert.rejects(pool.run({request}),/All configured/);assert.equal(calls,5);assert.equal(pool.allCoolingDown(),true);
+  await assert.rejects(pool.run({request}),/All configured/);assert.equal(calls,5);
 });
 test('concurrent characters never make simultaneous requests to the same provider',async()=>{
   const pool=new ImageProviderPool();let active=0,max=0;

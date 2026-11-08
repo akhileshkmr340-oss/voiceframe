@@ -11,9 +11,9 @@
 //   guess     a listening impression written for this list, not from any card
 // Kokoro voices that share a name with another company's voices are shown under a
 // VoiceFrame name (the voice id stays the same).
-import { findLanguage, PIPER_VOICES } from './langs.js?v=65';
-import { narratorsFor, INDIC_LANGS } from './voice.js?v=65';
-import { studioEngine } from './studio.js?v=65';
+import { findLanguage, PIPER_VOICES } from './langs.js?v=66';
+import { narratorsFor, INDIC_LANGS } from './voice.js?v=66';
+import { studioEngine } from './studio.js?v=66';
 
 // Kokoro-82M English voices: id -> [VoiceFrame name, timbre words, words' source]
 // Gender (f/m) and accent (a = American, b = British) are the id's own letters (card).

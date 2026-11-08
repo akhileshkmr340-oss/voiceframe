@@ -2,8 +2,8 @@
 // "Mix & match" slots, free words, a wardrobe per character (one outfit per shot) and
 // "✨ Suggest outfits" from the AI writer. Only outfits the character's age and gender allow
 // are ever shown or suggested (outfits.js).
-import { chat, parseJSON } from './ai.js?v=65';
-import { OUTFITS, CATEGORIES, OCCASIONS, SLOTS, COLOURS, FABRICS, outfitById, outfitsFor, allowed, outfitIssue, outfitLabel, ageOf, personWords } from './outfits.js?v=65';
+import { chat, parseJSON } from './ai.js?v=66';
+import { OUTFITS, CATEGORIES, OCCASIONS, SLOTS, COLOURS, FABRICS, outfitById, outfitsFor, allowed, outfitIssue, outfitLabel, ageOf, personWords } from './outfits.js?v=66';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

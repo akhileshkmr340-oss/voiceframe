@@ -38,7 +38,7 @@ export function aiDisclosure() {
   return 'This video was made with AI tools: an AI-written original story, AI-generated images, a synthetic narrator voice and a computer-generated soundtrack. Characters and events are fictional.';
 }
 
-import { voiceCredits } from './langs.js?v=65';
+import { voiceCredits } from './langs.js?v=66';
 
 // Real stock footage used in the film: [{ shot, credit, license, page, source }]
 export function stockClips(project) {

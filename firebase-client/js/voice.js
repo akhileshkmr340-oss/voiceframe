@@ -1,6 +1,6 @@
 // Voice in (dictation + voice commands) and voice out (narration).
-import { API, Cancelled, relayFetch } from './ai.js?v=65';
-import { findLanguage, sentences, PIPER_VOICES } from './langs.js?v=65';
+import { API, Cancelled, relayFetch } from './ai.js?v=66';
+import { findLanguage, sentences, PIPER_VOICES } from './langs.js?v=66';
 
 // ---------------- dictation ----------------
 export class Dictation {
@@ -193,7 +193,7 @@ let progressFn = null;
 
 function getWorker(slot) {
   if (slot.worker) return slot.worker;
-  const w = new Worker(new URL('./tts-worker.js?v=65', import.meta.url), { type: 'module' });
+  const w = new Worker(new URL('./tts-worker.js?v=66', import.meta.url), { type: 'module' });
   w.onmessage = e => {
     const m = e.data;
     if (m.type === 'progress') { progressFn?.(m.loaded / (m.total || 1)); return; }
@@ -291,7 +291,7 @@ let piperWorker = null, piperProgress = null;
 const piperPending = new Map();
 function piperCall(msg, ms) {
   if (!piperWorker) {
-    piperWorker = new Worker(new URL('./piper-worker.js?v=65', import.meta.url), { type: 'module' });
+    piperWorker = new Worker(new URL('./piper-worker.js?v=66', import.meta.url), { type: 'module' });
     piperWorker.onmessage = e => {
       const m = e.data;
       if (m.type === 'progress') { piperProgress?.(m.loaded / (m.total || 1)); return; }

@@ -1,7 +1,7 @@
 // Depth estimation (Depth Anything V2 small, ~27 MB, Apache-2.0) in the browser.
 // Each scene picture gets a depth map so the renderer can move a 3D camera through it.
 import { pipeline, RawImage, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.1/+esm';
-import { configureBrowserModels } from './browser-model-runtime.js?v=65';
+import { configureBrowserModels } from './browser-model-runtime.js?v=66';
 configureBrowserModels(env);
 
 const MODEL = 'onnx-community/depth-anything-v2-small';

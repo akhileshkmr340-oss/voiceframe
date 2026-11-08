@@ -1,5 +1,5 @@
-const PROVIDERS = ['nvidia', 'cloudflare-refs', 'cloudflare', 'pollinations'];
-export const providerName = id => ({ nvidia: 'NVIDIA FLUX', 'cloudflare-refs': 'Cloudflare FLUX.2', cloudflare: 'Cloudflare FLUX.1', pollinations: 'Pollinations' }[id] || id);
+const PROVIDERS = ['nvidia', 'cloudflare-refs', 'cloudflare', 'pollinations', 'kaggle'];
+export const providerName = id => ({ nvidia: 'NVIDIA FLUX', 'cloudflare-refs': 'Cloudflare FLUX.2', cloudflare: 'Cloudflare FLUX.1', pollinations: 'Pollinations', kaggle: 'Free Kaggle GPU' }[id] || id);
 const cancelled = signal => {
   if (signal?.aborted) throw signal.reason || new DOMException('Cancelled', 'AbortError');
 };

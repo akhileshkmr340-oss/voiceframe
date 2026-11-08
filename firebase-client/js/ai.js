@@ -1,9 +1,10 @@
-import { imageProviders } from './image-providers.js?v=65';
+import { freeGpuPortrait } from './free-gpu-portrait.js?v=66';
+import { imageProviders } from './image-providers.js?v=66';
 // The AI services, all through the site's relay (open models only): writers, painters,
 // voices, transcription and the free GPU jobs; plus Openverse public-domain photos as
 // the last-resort picture.
-import { idToken } from './auth.js?v=65';
-import { checkImage, warmSafety, Unsafe, SafetyDown } from './safety.js?v=65';
+import { idToken } from './auth.js?v=66';
+import { checkImage, warmSafety, Unsafe, SafetyDown } from './safety.js?v=66';
 export { Unsafe, SafetyDown };
 
 export const API = (window.VF_CONFIG?.apiBase || 'api').replace(/\/$/, '');
@@ -180,6 +181,11 @@ export async function paintImage(prompt, { width, height, seed, onWait, onProvid
   if (signal?.aborted) throw new Cancelled();
   return imageProviders.run({ painter, refs, lock, signal, onProgress: onProvider,
     request: async provider => {
+      if (provider === 'kaggle') {
+        const blob = await freeGpuPortrait({ api: API, relayFetch, prompt, seed, signal, onProgress: onProvider });
+        await checkImage(blob);
+        return blob;
+      }
       const timeout = AbortSignal.timeout(65000);
       const body = JSON.stringify({ prompt: prompt.slice(0, 1800), width, height, seed, painter: provider,
         ...(refs.length && provider === 'cloudflare-refs' ? { refs, lock: true } : {}) });

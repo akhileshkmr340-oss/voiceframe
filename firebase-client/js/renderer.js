@@ -1,14 +1,14 @@
 // Frame compositor: camera moves, colour grade, particles, grain, letterbox,
 // captions, title and end cards. draw(ctx, t) is pure in t, so preview and
 // export render identical frames.
-import { mouthEnvelope } from './faces.js?v=65';
-import { bodyStyle } from './body.js?v=65';
+import { mouthEnvelope } from './faces.js?v=66';
+import { bodyStyle } from './body.js?v=66';
 // facial expressions: [smile, eyebrows, jaw held open, laugh bursts]
 const EXPR = { neutral: [0, 0, 0, 0], smile: [0.8, 0.2, 0, 0], laugh: [1, 0.35, 0.12, 1], sad: [-0.6, 0.35, 0, 0], angry: [-0.35, -0.75, 0, 0], surprised: [0, 1, 0.3, 0], worried: [-0.3, 0.45, 0, 0] };
 // action-timeline moves -> the body motion that plays them
 const MOVE_STYLE = { raise: 'point', point: 'point', wave: 'wave', pull: 'pull', clap: 'clap', walk: 'walk', run: 'run', dance: 'dance' };
-import { transitionFor } from './music.js?v=65';
-import { captionFont, titleFont, splitWords, isRTLText } from './langs.js?v=65';
+import { transitionFor } from './music.js?v=66';
+import { captionFont, titleFont, splitWords, isRTLText } from './langs.js?v=66';
 
 export const INTRO = 4.2, OUTRO = 6.5;
 
