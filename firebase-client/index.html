@@ -340,6 +340,7 @@
     </aside>
 
     <div class="studio-main">
+      <p id="stageReport" class="tiny muted" role="status" aria-live="polite" hidden></p>
       <header class="workspace-bar" aria-label="Project workspace">
         <div class="workspace-heading"><small>VOICEFRAME / FILM WORKSPACE</small><strong id="workspaceProjectName">Untitled project</strong></div>
         <div class="workspace-state"><span class="workspace-pill" id="workspaceMode">Full AI motion</span><span class="workspace-pill" id="workspaceFootage">0 shots</span><span class="workspace-pill" id="workspaceGpu">GPU status</span><button class="btn btn-ghost btn-sm" type="button" data-next="film">Preview &amp; export ↗</button></div>
@@ -580,7 +581,7 @@
           </div>
         </div>
         <div class="quality-block" id="fullMotionBlock" role="status" hidden>
-          <strong>Full-motion footage is still being prepared</strong><p id="fullMotionBlockText"></p>
+          <strong>Full-motion footage or quality review is incomplete</strong><p id="fullMotionBlockText"></p>
           <div class="actions"><button class="btn btn-primary btn-sm" type="button" id="btnRetryMissingMotion">Retry unfinished clips</button><button class="btn btn-ghost btn-sm" type="button" id="btnAlternateFootage">Other video tools / import</button><button class="btn btn-ghost btn-sm" type="button" data-next="scenes">Review shots</button><button class="btn btn-ghost btn-sm" type="button" id="btnUseBasic">Use basic animation instead</button></div>
         </div>
         <div class="film-layout">
@@ -826,6 +827,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="js/config.js?v=30"></script>
-<script type="module" src="js/app.js?v=59"></script>
+<script type="module" src="js/app.js?v=62"></script>
 </body>
 </html>

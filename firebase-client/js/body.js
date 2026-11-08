@@ -1,3 +1,4 @@
+import { waitVideoEvent, seekVideo } from './media-readiness.js?v=60';
 // Live bodies: finds each person's skeleton and outline in a shot's picture on the device
 // (MediaPipe Pose Landmarker, Apache-2.0), so the renderer can bend their arms and legs
 // every frame (gestures while they speak, waving, pointing, walking, dancing) and make
@@ -190,16 +191,15 @@ export async function motionFromVideo(file, onProgress) {
 // ---- motion-quality check: follow the main person through an AI clip ----
 // Flags (never rejects) a clip whose person vanishes mid-shot, or whose hands jump further
 // between two looks 0.6 s apart than a body can move. Returns the issue, or ''.
-export async function clipMotionIssue(blob) {
+export async function clipMotionIssue(blob, signal) {
   const lm = await loadVideoLm();
   const v = document.createElement('video'), url = URL.createObjectURL(blob);
   v.muted = true; v.preload = 'auto'; v.src = url;
   try {
-    await new Promise((res, rej) => { v.onloadeddata = res; v.onerror = () => rej(new Error('unreadable')); });
+    if (v.readyState < 2) await waitVideoEvent(v, 'loadeddata', {signal});
     const aspect = v.videoWidth / v.videoHeight, seen = [];
     for (let k = 0; k < 8; k++) {
-      v.currentTime = v.duration * (0.05 + 0.9 * k / 7);
-      await new Promise(res => { v.onseeked = res; });
+      await seekVideo(v, v.duration * (0.05 + 0.9 * k / 7), {signal});
       seen.push(lm.detectForVideo(v, (stamp += 100)).landmarks?.[0] || null);
     }
     const found = seen.map(Boolean);
@@ -219,7 +219,7 @@ export async function clipMotionIssue(blob) {
       if (shoulders > 1.5 * t) return 'the body jumps between frames';
     }
     return '';
-  } catch { return ''; } finally { URL.revokeObjectURL(url); }
+  } finally { URL.revokeObjectURL(url); v.removeAttribute('src'); v.load(); }
 }
 
 // What the people in a shot do, read from the script: a gesture style per shot.

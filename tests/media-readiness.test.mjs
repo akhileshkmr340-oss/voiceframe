@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {waitVideoEvent,seekVideo} from '../firebase-client/js/media-readiness.js';
+test('seek to an already decoded frame does not wait for an event that will never fire',async()=>{const v=new EventTarget();Object.assign(v,{currentTime:2,readyState:2});await seekVideo(v,2,{timeout:5});});
+test('decode timeout and cancellation reject cleanly',async()=>{await assert.rejects(waitVideoEvent(new EventTarget(),'seeked',{timeout:5}),/timed out/);const c=new AbortController(),p=waitVideoEvent(new EventTarget(),'seeked',{signal:c.signal});c.abort();await assert.rejects(p,{name:'AbortError'});});
